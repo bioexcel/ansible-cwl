@@ -8,10 +8,11 @@
   
   - name: Install deps
     yum:
-      name: ['python2-pip']#, 'python2-devel']
+      name: ['python2-pip', 'python2-devel']
       state: present
     become: yes
     become_user: root
+    become_method: su
 
   - name: install virtualenv
     pip:
@@ -20,7 +21,7 @@
 
   - name: install toil in virtualenv
     pip:
-      name: cwtool
+      name: cwlref-runner
       virtualenv: ~/cwl_test
       virtualenv_python: python2.7
 
@@ -56,4 +57,4 @@
 
 
 #### one liner
-# ansible-playbook ansible-cwl/cwl/playbook.yml && cd ~/cwl_test && bin/activate && cwl-runner example.cwl example-job.yaml
+# ansible-playbook -K ansible-cwl/cwl/playbook.yml && cd ~/cwl_test && bin/activate && cwl-runner example.cwl example-job.yaml
