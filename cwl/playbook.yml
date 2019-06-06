@@ -57,4 +57,4 @@
 
 
 #### one liner
-# ansible-playbook -K ansible-cwl/cwl/playbook.yml && cd ~/cwl_test && bin/activate && cwl-runner example.cwl example-job.yaml
+# ansible-playbook -K ansible-cwl/cwl/playbook.yml && cd ~/cwl_test && source bin/activate && cwl-runner example.cwl example-job.yaml && deactivate
