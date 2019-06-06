@@ -10,8 +10,15 @@
     yum:
       name: ['python2-pip', 'python2-devel']
       state: present
+    become: yes
+    become_user: root
 
   - name: install virtualenv
+    pip:
+      name: virtualenv
+      extra_args: --user
+
+  - name: install toil in virtualenv
     pip:
       name: toil[cwl]
       virtualenv: ~/toil_test
