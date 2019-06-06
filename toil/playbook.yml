@@ -12,6 +12,7 @@
       state: present
     become: yes
     become_user: root
+    become_method: su
 
   - name: install virtualenv
     pip:
@@ -56,4 +57,4 @@
 
 
 #### one liner
-# ansible-playbook ansible-cwl/toil/playbook.yml && cd ~/toil_test && bin/activate && toil-cwl-runner example.cwl example-job.yaml
+# ansible-playbook -K ansible-cwl/toil/playbook.yml && cd ~/toil_test && source bin/activate && toil-cwl-runner example.cwl example-job.yaml && deactivate
