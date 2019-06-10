@@ -70,4 +70,4 @@
 
 #### one liner
 
-ansible-playbook -K ansible-cwl/airflow/playbook.yml && cd ~/airflow_test && source bin/activate && cwl-airflow init && (airflow scheduler &> /dev/null &) && (airflow webserver&> /dev/null &) && cwl-airflow submit example.cwl example-job.yaml
+## ansible-playbook -K ansible-cwl/airflow/playbook.yml && cd ~/airflow_test && source bin/activate && cwl-airflow init && (airflow scheduler &> /dev/null &) && (airflow webserver&> /dev/null &) && cwl-airflow submit example.cwl example-job.yaml
