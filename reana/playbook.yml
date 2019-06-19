@@ -1,0 +1,197 @@
+---
+
+- name: playbook to install pip
+  hosts: localhost
+  connection: local
+
+  tasks:
+  
+
+  # Needed for pip
+  - name: Install EPEL
+    yum: 
+      name: epel-release
+    become: yes
+    become_user: root
+    become_method: su
+
+    
+  - name: Install reana dependencies
+    yum:
+      name: ['python36-pip', 'python36-devel', 'python36', 'gcc', 'make', 'qemu-kvm', 'libvirt', 'libvirt-daemon-kvm', 'kubectl']
+      state: present
+    become: yes
+    become_user: root
+    become_method: su
+
+
+  - name: Install minikube
+    get_url:
+      url: "https://github.com/kubernetes/minikube/releases/latest/docker-machine-driver-kvm2"
+      dest: "/usr/local/bin/docker-machine-driver-kvm2"
+    become: yes
+    become_user: root
+    become_method: su
+
+
+  - name: chmod kvm driver
+    file:
+      dest: "/usr/local/bin/docker-machine-driver-kvm2"
+      mode: 0755
+    become: yes
+    become_user: root
+    become_method: su
+
+  - name: Install helm
+    unarchive:
+      src: "https://storage.googleapis.com/kubernetes-helm/helm-v2.12.2-linux-amd64.tar.gz"
+      dest: "/usr/local/bin/"
+      extra_opts: "linux-amd64/helm"
+    become: yes
+    become_user: root
+    become_method: su
+
+
+  - name: chmod kvm driver
+    file:
+      dest: "/usr/local/bin/docker-machine-driver-kvm2"
+      mode: 0755
+    become: yes
+    become_user: root
+    become_method: su
+
+
+  - name: start minikube cluster
+    command: minikube start --feature-gates="TTLAfterFinished=true" --vm-driver kvm2
+
+
+  - name: install virtualenv
+    pip:
+      name: virtualenv
+      extra_args: --user
+
+  - name: install reana in virtualenv
+    pip:
+      name: ['reana-client', 'reana-cluster']
+      virtualenv: ~/reana_cwl
+      virtualenv_python: python3.6
+
+
+  - name: example-job.yaml
+    copy:
+      dest: ~/reana_cwl/example-job.yaml
+      content: |
+        message: Hello world!
+
+  - name: example.cwl
+    copy:
+      dest: ~/reana_cwl/example.cwl
+      content: |
+        cwlVersion: v1.0
+        class: CommandLineTool
+        baseCommand: echo
+        stdout: output.txt
+        inputs:
+          message:
+            type: string
+            inputBinding:
+              position: 1
+        outputs:
+          output:
+            type: stdout
+
+  - name: reana.yaml
+    copy:
+      dest: ~/reana_cwl/example.cwl
+      content: |
+        version: 0.4.0
+        inputs:
+          parameters:
+            input: example-job.yaml
+        workflow:
+          type: cwl
+          file: example.cwl
+        outputs:
+          output:
+            files:
+              - output.txt
+        
+
+# source ~/reana_cwl/bin/activate
+# helm init
+# reana-cluster init --traefik
+# reana-cluster status
+# eval $(reana-cluster env --incude-admin-token)
+# reana-client create -n my-analysis
+# export REANA_WORKON=my-analysis
+# reana-client upload
+# reana-client start
+# reana-client status
+# reana-client ls
+# reana-client download
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  - name: example-job.yaml
+    copy:
+      dest: ~/toil_test/example-job.yaml
+      content: |
+        message: Hello world!
+
+  - name: example.cwl
+    copy:
+      dest: ~/toil_test/example.cwl
+      content: |
+        cwlVersion: v1.0
+        class: CommandLineTool
+        baseCommand: echo
+        stdout: output.txt
+        inputs:
+          message:
+            type: string
+            inputBinding:
+              position: 1
+        outputs:
+          output:
+            type: stdout
+
+##
+# run ansible-playbook
+# cd ~/toil_test
+# bin/actvate 
+# toil-cwl-runner example.cwl example-job.yaml
+##
+
+
+#### one liner
+# ansible-playbook -K ansible-cwl/toil/playbook.yml && cd ~/toil_test && source bin/activate && toil-cwl-runner example.cwl example-job.yaml && deactivate
