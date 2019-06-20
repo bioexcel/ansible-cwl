@@ -47,6 +47,7 @@
       src: "https://storage.googleapis.com/kubernetes-helm/helm-v2.12.2-linux-amd64.tar.gz"
       dest: "/usr/local/bin/"
       extra_opts: "linux-amd64/helm"
+    remote_src: yes
     become: yes
     become_user: root
     become_method: su
@@ -129,61 +130,6 @@
 # reana-client status
 # reana-client ls
 # reana-client download
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  - name: example-job.yaml
-    copy:
-      dest: ~/toil_test/example-job.yaml
-      content: |
-        message: Hello world!
-
-  - name: example.cwl
-    copy:
-      dest: ~/toil_test/example.cwl
-      content: |
-        cwlVersion: v1.0
-        class: CommandLineTool
-        baseCommand: echo
-        stdout: output.txt
-        inputs:
-          message:
-            type: string
-            inputBinding:
-              position: 1
-        outputs:
-          output:
-            type: stdout
 
 ##
 # run ansible-playbook
