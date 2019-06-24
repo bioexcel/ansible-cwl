@@ -25,7 +25,7 @@
     become_method: su
 
 
-  - name: Install minikube
+  - name: Get and install minikube
     get_url:
       url: "https://github.com/kubernetes/minikube/releases/latest/docker-machine-driver-kvm2"
       dest: "/usr/local/bin/docker-machine-driver-kvm2"
@@ -34,7 +34,7 @@
     become_method: su
 
 
-  - name: chmod kvm driver
+  - name: Chnage permissions for minikube driver
     file:
       dest: "/usr/local/bin/docker-machine-driver-kvm2"
       mode: 0755
@@ -44,6 +44,7 @@
 
   - name: Install helm
     unarchive:
+      remote_src: yes
       src: "https://storage.googleapis.com/kubernetes-helm/helm-v2.12.2-linux-amd64.tar.gz"
       dest: "/usr/local/bin/"
       extra_opts: "linux-amd64/helm"
@@ -102,7 +103,7 @@
 
   - name: reana.yaml
     copy:
-      dest: ~/reana_cwl/example.cwl
+      dest: ~/reana_cwl/reana.yaml
       content: |
         version: 0.4.0
         inputs:
@@ -129,69 +130,6 @@
 # reana-client status
 # reana-client ls
 # reana-client download
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  - name: example-job.yaml
-    copy:
-      dest: ~/toil_test/example-job.yaml
-      content: |
-        message: Hello world!
-
-  - name: example.cwl
-    copy:
-      dest: ~/toil_test/example.cwl
-      content: |
-        cwlVersion: v1.0
-        class: CommandLineTool
-        baseCommand: echo
-        stdout: output.txt
-        inputs:
-          message:
-            type: string
-            inputBinding:
-              position: 1
-        outputs:
-          output:
-            type: stdout
-
-##
-# run ansible-playbook
-# cd ~/toil_test
-# bin/actvate 
-# toil-cwl-runner example.cwl example-job.yaml
-##
-
 
 #### one liner
 # ansible-playbook -K ansible-cwl/toil/playbook.yml && cd ~/toil_test && source bin/activate && toil-cwl-runner example.cwl example-job.yaml && deactivate
