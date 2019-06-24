@@ -118,11 +118,13 @@
             files:
               - output.txt
         
-
-# source ~/reana_cwl/bin/activate
+#### one liner
+# ansible-playbook -K ansible-cwl/toil/playbook.yml
+# minikube start --feature-gates="TTLAfterFinished=true"
+# cd reana_cwl
+# source bin/activate
 # helm init
 # reana-cluster init --traefik
-# reana-cluster status
 # eval $(reana-cluster env --incude-admin-token)
 # reana-client create -n my-analysis
 # export REANA_WORKON=my-analysis
@@ -131,6 +133,3 @@
 # reana-client status
 # reana-client ls
 # reana-client download
-
-#### one liner
-# ansible-playbook -K ansible-cwl/toil/playbook.yml && cd ~/toil_test && source bin/activate && toil-cwl-runner example.cwl example-job.yaml && deactivate
