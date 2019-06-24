@@ -18,7 +18,7 @@
     
   - name: Install reana dependencies
     yum:
-      name: ['python36-pip', 'python36-devel', 'python36', 'gcc', 'make', 'qemu-kvm', 'libvirt', 'libvirt-daemon-kvm', 'kubectl']
+      name: ['python36-pip', 'python36-devel', 'python36', 'gcc', 'make', 'qemu-kvm', 'libvirt', 'libvirt-daemon-kvm']
       state: present
     become: yes
     become_user: root
@@ -27,7 +27,7 @@
 
   - name: Get and install minikube
     get_url:
-      url: "https://github.com/kubernetes/minikube/releases/latest/docker-machine-driver-kvm2"
+      url: "https://github.com/kubernetes/minikube/releases/download/v1.2.0/docker-machine-driver-kvm2"
       dest: "/usr/local/bin/docker-machine-driver-kvm2"
     become: yes
     become_user: root
@@ -41,6 +41,24 @@
     become: yes
     become_user: root
     become_method: su
+
+  - name: Get and install minikube
+    get_url:
+      url: "https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64"
+      dest: "/usr/local/bin/minikube"
+    become: yes
+    become_user: root
+    become_method: su
+
+
+  - name: Chnage permissions for minikube driver
+    file:
+      dest: "/usr/local/bin/minikube"
+      mode: 0755
+    become: yes
+    become_user: root
+    become_method: su
+
 
   - name: Install helm
     unarchive:
