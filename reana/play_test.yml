@@ -1,0 +1,79 @@
+---
+
+- name: playbook to install pip
+  hosts: localhost
+  connection: local
+
+  tasks:
+
+  - name: kubernetes.repo
+    copy:
+      dest: etc/yum.repos.d/kubernetes.repo
+      content: |
+        [kubernetes]
+        name=Kubernetes
+        baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-$basearch
+        enabled=1
+        gpgcheck=1
+        repo_gpgcheck=1
+        gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+
+
+  - name: Install reana dependencies
+    yum:
+      name: ['qemu-kvm', 'libvirt', 'libvirt-daemon-kvm']
+      state: present
+    become: yes
+    become_user: root
+    become_method: su
+
+    ## Get Docker Driver
+  - name: Get and install minikube
+    get_url:
+      url: "https://github.com/kubernetes/minikube/releases/download/v1.2.0/docker-machine-driver-kvm2"
+      dest: "/usr/local/bin/docker-machine-driver-kvm2"
+    become: yes
+    become_user: root
+    become_method: su
+
+
+  - name: Chnage permissions for minikube driver
+    file:
+      dest: "/usr/local/bin/docker-machine-driver-kvm2"
+      mode: 0755
+    become: yes
+    become_user: root
+    become_method: su
+
+## Get Minikube
+  - name: Get and install minikube
+    get_url:
+      url: "https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64"
+      dest: "/usr/local/bin/minikube"
+    become: yes
+    become_user: root
+    become_method: su
+
+
+  - name: Chnage permissions for minikube driver
+    file:
+      dest: "/usr/local/bin/minikube"
+      mode: 0755
+    become: yes
+    become_user: root
+    become_method: su
+
+
+  - name: Install helm
+    unarchive:
+      remote_src: yes
+      src: "https://storage.googleapis.com/kubernetes-helm/helm-v2.12.2-linux-amd64.tar.gz"
+      dest: "/usr/local/bin/"
+      extra_opts: "linux-amd64/helm"
+    remote_src: yes
+    become: yes
+    become_user: root
+    become_method: su
+
+  - name: start minikube cluster
+    command: minikube start --feature-gates="TTLAfterFinished=true" --vm-driver kvm2
