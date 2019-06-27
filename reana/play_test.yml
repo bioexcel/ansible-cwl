@@ -21,10 +21,18 @@
     become_user: root
     become_method: su
 
+  - name: Install EPEL
+    yum:
+      name: ['epel-release']
+      state: present
+    become: yes
+    become_user: root
+    become_method: su
+
 
   - name: Install reana dependencies
     yum:
-      name: ['python36-pip', 'python36-devel', 'python36', 'gcc', 'make', 'qemu-kvm', 'libvirt', 'libvirt-daemon-kvm']name: ['qemu-kvm', 'libvirt', 'libvirt-daemon-kvm']
+      name: ['python36-pip', 'python36-devel', 'python36', 'gcc', 'make', 'qemu-kvm', 'libvirt', 'libvirt-daemon-kvm']
       state: present
     become: yes
     become_user: root
@@ -78,11 +86,20 @@
     become_user: root
     become_method: su
 
-  - name: start minikube cluster
-    command: minikube start --feature-gates="TTLAfterFinished=true" --vm-driver kvm2
+  - name: Install helm in correct location
+    copy:
+      src: /usr/local/bin/linux-amd64/helm
+      dest: /usr/local/bin/helm
+      mode: '0755'
     become: yes
     become_user: root
     become_method: su
+
+  - name: start minikube cluster
+    command: minikube start --feature-gates="TTLAfterFinished=true" --vm-driver kvm2
+    #become: yes
+    #become_user: root
+    #become_method: su
 
 
 
@@ -90,6 +107,7 @@
     pip:
       name: virtualenv
       extra_args: --user
+      executable: pip3
 
   - name: install reana in virtualenv
     pip:
