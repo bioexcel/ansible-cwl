@@ -29,6 +29,12 @@
     become_user: root
     become_method: su
 
+  - name: add user to libvoirtd group
+    user:
+      user: longr
+      groups: libvirt
+      append: yes
+
 
   - name: Install reana dependencies
     yum:
