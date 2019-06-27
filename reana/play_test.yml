@@ -15,7 +15,7 @@
         baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-$basearch
         enabled=1
         gpgcheck=1
-        repo_gpgcheck=1
+        repo_gpgcheck=0
         gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
     become: yes
     become_user: root
@@ -24,7 +24,7 @@
 
   - name: Install reana dependencies
     yum:
-      name: ['qemu-kvm', 'libvirt', 'libvirt-daemon-kvm']
+      name: ['python36-pip', 'python36-devel', 'python36', 'gcc', 'make', 'qemu-kvm', 'libvirt', 'libvirt-daemon-kvm']name: ['qemu-kvm', 'libvirt', 'libvirt-daemon-kvm']
       state: present
     become: yes
     become_user: root
@@ -80,3 +80,59 @@
 
   - name: start minikube cluster
     command: minikube start --feature-gates="TTLAfterFinished=true" --vm-driver kvm2
+    become: yes
+    become_user: root
+    become_method: su
+
+
+
+  - name: install virtualenv
+    pip:
+      name: virtualenv
+      extra_args: --user
+
+  - name: install reana in virtualenv
+    pip:
+      name: ['reana-client', 'reana-cluster']
+      virtualenv: ~/reana_cwl
+      virtualenv_python: python3.6
+
+
+  - name: example-job.yaml
+    copy:
+      dest: ~/reana_cwl/example-job.yaml
+      content: |
+        message: Hello world!
+
+  - name: example.cwl
+    copy:
+      dest: ~/reana_cwl/example.cwl
+      content: |
+        cwlVersion: v1.0
+        class: CommandLineTool
+        baseCommand: echo
+        stdout: output.txt
+        inputs:
+          message:
+            type: string
+            inputBinding:
+              position: 1
+        outputs:
+          output:
+            type: stdout
+
+  - name: reana.yaml
+    copy:
+      dest: ~/reana_cwl/reana.yaml
+      content: |
+        version: 0.4.0
+        inputs:
+          parameters:
+            input: example-job.yaml
+        workflow:
+          type: cwl
+          file: example.cwl
+        outputs:
+          output:
+            files:
+              - output.txt
