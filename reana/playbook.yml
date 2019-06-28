@@ -1,37 +1,69 @@
 ---
 
+## https://www.server-world.info/en/note?os=CentOS_7&p=kubernetes&f=1
+## https://reana.readthedocs.io/en/latest/gettingstarted.html#step-two-install-reana-cluster
+
 - name: playbook to install pip
   hosts: localhost
   connection: local
-
-  tasks:
+  vars:
+    ansible_become_user: root
+    ansible_become_method: su
   
 
-  # Needed for pip
-  - name: Install EPEL
-    yum: 
-      name: epel-release
-    become: yes
-    become_user: root
-    become_method: su
+  tasks:
 
-    
-  - name: Install reana dependencies
+  - name: kubernetes.repo
+    copy:
+      dest: /etc/yum.repos.d/kubernetes.repo
+      content: |
+        [kubernetes]
+        name=Kubernetes
+        baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-$basearch
+        enabled=1
+        gpgcheck=1
+        repo_gpgcheck=0
+        gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+    become: yes
+
+
+  - name: Install EPEL
     yum:
-      name: ['python36-pip', 'python36-devel', 'python36', 'gcc', 'make', 'qemu-kvm', 'libvirt', 'libvirt-daemon-kvm']
+      name: ['epel-release']
       state: present
     become: yes
     become_user: root
     become_method: su
 
+  - name: add user to libvoirtd group
+    user:
+      user: longr
+      groups: libvirt
+      append: yes
+    become: yes
 
+
+  - name: Install reana dependencies
+    yum:
+      name: ['python36-pip', 'python36-devel', 'python36', 'gcc', 'make', 'qemu-kvm', 'libvirt', 'libvirt-daemon-kvm']
+      state: present
+    become: yes
+    #become_user: root
+    #become_method: su
+
+    ## Get Docker Driver
   - name: Get and install minikube
     get_url:
       url: "https://github.com/kubernetes/minikube/releases/download/v1.2.0/docker-machine-driver-kvm2"
       dest: "/usr/local/bin/docker-machine-driver-kvm2"
     become: yes
-    become_user: root
-    become_method: su
+
+
+  - name: Install kubectl
+    yum:
+      name: kubectl
+      state: present
+    become: yes
 
 
   - name: Chnage permissions for minikube driver
@@ -39,16 +71,14 @@
       dest: "/usr/local/bin/docker-machine-driver-kvm2"
       mode: 0755
     become: yes
-    become_user: root
-    become_method: su
 
+
+## Get Minikube
   - name: Get and install minikube
     get_url:
       url: "https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64"
       dest: "/usr/local/bin/minikube"
     become: yes
-    become_user: root
-    become_method: su
 
 
   - name: Chnage permissions for minikube driver
@@ -56,8 +86,6 @@
       dest: "/usr/local/bin/minikube"
       mode: 0755
     become: yes
-    become_user: root
-    become_method: su
 
 
   - name: Install helm
@@ -68,27 +96,26 @@
       extra_opts: "linux-amd64/helm"
     remote_src: yes
     become: yes
-    become_user: root
-    become_method: su
 
 
-  - name: chmod kvm driver
-    file:
-      dest: "/usr/local/bin/docker-machine-driver-kvm2"
-      mode: 0755
+  - name: Install helm in correct location
+    copy:
+      src: /usr/local/bin/linux-amd64/helm
+      dest: /usr/local/bin/helm
+      mode: '0755'
     become: yes
-    become_user: root
-    become_method: su
 
 
   - name: start minikube cluster
     command: minikube start --feature-gates="TTLAfterFinished=true" --vm-driver kvm2
+    #become: yes
 
 
   - name: install virtualenv
     pip:
       name: virtualenv
       extra_args: --user
+      executable: pip3
 
   - name: install reana in virtualenv
     pip:
@@ -135,19 +162,3 @@
           output:
             files:
               - output.txt
-        
-#### one liner
-# ansible-playbook -K ansible-cwl/toil/playbook.yml
-# minikube start --feature-gates="TTLAfterFinished=true"
-# cd reana_cwl
-# source bin/activate
-# helm init
-# reana-cluster init --traefik
-# eval $(reana-cluster env --incude-admin-token)
-# reana-client create -n my-analysis
-# export REANA_WORKON=my-analysis
-# reana-client upload
-# reana-client start
-# reana-client status
-# reana-client ls
-# reana-client download
