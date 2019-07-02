@@ -1,6 +1,8 @@
-#Introduction
+# Ansible scripts for installing CWL engines
 
-A series of playbooks to install and test various implementations of CWL
+## Introduction
+
+A series of playbooks to install and test various [implementations of CWL](https://www.commonwl.org/#Implementations)
 
 toil
 ----
