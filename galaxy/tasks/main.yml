@@ -1,0 +1,17 @@
+---
+# Tasks to install and configure galaxy
+
+# Install dependencies
+# On CentOS libpq = postgresql
+# https://serverfault.com/questions/316703/how-to-install-libpq-dev-on-centos-5-5
+
+- name: 
+  yum:
+    name: [python-devel, python-pip, gcc, make, postgresql-devel]
+
+
+# Clone galaxy repo
+- git:
+    repo: 'https://github.com/common-workflow-language/galaxy.git'
+    dest: /app/galaxy
+#    version: release-0.22
