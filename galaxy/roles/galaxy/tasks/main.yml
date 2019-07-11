@@ -10,7 +10,17 @@
   shell: yum-config-manager --add-repo=https://dl.yarnpkg.com/rpm/yarn.repo
   args:
     creates: /etc/yum.repos.d/yarn.repo
+  become: yes
+  become_user: root
+  become_method: su
 
+- name: Install EPEL
+  yum:
+    name: ['epel-release']
+    state: present
+  become: yes
+  become_user: root
+  become_method: su
 
 # Install dependencies
 # On CentOS libpq = postgresql
@@ -19,6 +29,9 @@
 - name: Install dependencies
   yum:
     name: [python-devel, python-pip, gcc, make, postgresql-devel, yarn]
+  become: yes
+  become_user: root
+  become_method: su
 
 # Clone galaxy repo:
 - name: Clone galaxy repo.
@@ -26,6 +39,9 @@
     repo: 'https://github.com/common-workflow-language/galaxy.git'
     dest: /app/galaxy
     depth: 1
+  become: yes
+  become_user: root
+  become_method: su
 
 # Clone galaxy repo:
 - name: Clone galaxy repo.
@@ -33,6 +49,9 @@
     repo: 'https://github.com/EBI-metagenomics/workflow-is-cwl'
     dest: /app/workflow-is-cwl
     depth: 1
+  become: yes
+  become_user: root
+  become_method: su
 
 # Copy config files
 
@@ -40,6 +59,9 @@
   synchronize:
     src: app
     dest: /app
+  become: yes
+  become_user: root
+  become_method: su
 
 
 #mv representation.py app/galaxy/lib/galaxy/tools/cwl/representation.py
@@ -62,9 +84,24 @@
 #Installyarnrepo
 
 #Clonegalaxyrepo
--git:
-repo:'https://github.com/common-workflow-language/galaxy.git'
-dest:/app/galaxy
+- name: clone galaxy repo
+  git:
+    repo: 'https://github.com/common-workflow-language/galaxy.git'
+    dest: /app/galaxy
+  become: yes
+  become_user: root
+  become_method: su
+
+
+
+#- name: Clone galaxy repo.
+#  git:
+#    repo: 'https://github.com/common-workflow-language/galaxy.git'
+#    dest: /app/galaxy
+#    depth: 1
+
+
+
 #version:release-0.22
 
 
