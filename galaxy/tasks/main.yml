@@ -1,17 +1,81 @@
 ---
 # Tasks to install and configure galaxy
 
+
+# Add yarn repo.
+# Uses creates command so as not to run if file exists
+# https://stackoverflow.com/questions/53976165/importing-adding-a-yum-repo-file-using-ansible
+
+- name: Add Yarn repository
+  shell: yum-config-manager --add-repo=https://dl.yarnpkg.com/rpm/yarn.repo
+  args:
+    creates: /etc/yum.repos.d/yarn.repo
+
+
 # Install dependencies
 # On CentOS libpq = postgresql
 # https://serverfault.com/questions/316703/how-to-install-libpq-dev-on-centos-5-5
 
-- name: 
+- name: Install dependencies
   yum:
-    name: [python-devel, python-pip, gcc, make, postgresql-devel]
+    name: [python-devel, python-pip, gcc, make, postgresql-devel, yarn]
 
-
-# Clone galaxy repo
-- git:
+# Clone galaxy repo:
+- name: Clone galaxy repo.
+  git:
     repo: 'https://github.com/common-workflow-language/galaxy.git'
     dest: /app/galaxy
-#    version: release-0.22
+    depth: 1
+
+# Clone galaxy repo:
+- name: Clone galaxy repo.
+  git:
+    repo: 'https://github.com/EBI-metagenomics/workflow-is-cwl'
+    dest: /app/workflow-is-cwl
+    depth: 1
+
+# Copy config files
+
+- name: Copy galaxy configs
+  synchronize:
+    src: app
+    dest: /app
+
+
+#mv representation.py app/galaxy/lib/galaxy/tools/cwl/representation.py
+#mv parser.py app/galaxy/lib/galaxy/tools/cwl/parser.py
+#mv wrappers.py app/galaxy/lib/galaxy/tools/wrappers.py
+#mv job_conf.xml app/galaxy/config/job_conf.xml
+#mv dependency_resolvers_conf.xml app/galaxy/config/dependency_resolvers_conf.xml
+#mv galaxy.yml app/galaxy/config/galaxy.yml
+#mv tool_conf.xml app/galaxy/config/tool_conf.xml
+#mv welcome.html app/galaxy/static/welcome.html
+#mv start.sh app/start.sh
+#mv Diamon.makedb-v0.9.21.cwl app/workflow-is-cwl/tools/Diamond/Diamon.makedb-v0.9.21.cwl
+#mv create_user.py app/galaxy/create_user.py
+#mv workflows.py app/galaxy/lib/galaxy/managers/workflows.py
+#mv upload_material.py app
+#mv start_galaxy_and_upload_material.sh app
+#mv process.py app/galaxy/.venv/local/lib/python2.7/site-packages/cwltool/process.py
+
+
+#Installyarnrepo
+
+#Clonegalaxyrepo
+-git:
+repo:'https://github.com/common-workflow-language/galaxy.git'
+dest:/app/galaxy
+#version:release-0.22
+
+
+#Starupcommands:
+#-name:commonstartup
+#command:cd/app/galaxy&&./scripts/common_startup.sh
+
+#-name:createdb
+#command:cd/app/galaxy&&./create_db.sh
+
+#-name:managaedb
+#command:cd/app/galaxy&&./manage_db.shupgrade
+
+
