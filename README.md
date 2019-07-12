@@ -11,3 +11,12 @@ Deploy and test:
 ```
 ansible-playbook ansible-cwl/toil/playbook.yml && cd ~/toil_test && bin/activate && toil-cwl-runner example.cwl example-job.yaml
 ```
+
+
+galaxy
+-----
+
+```
+ansible-cwl/galaxy/
+ansible-playbook galaxy.yml -K
+```
