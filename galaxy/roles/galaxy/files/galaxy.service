@@ -1,0 +1,20 @@
+[Unit]
+Description=Galaxy server
+Documentation=https://docs.galaxyproject.org/en/master/admin/production.html https://github.com/bioexcel/ansible-cwl/
+After=network-online.target
+Wants=network-online.target docker
+
+[Service]
+Type=idle
+#EnvironmentFile=/etc/sysconfig/galaxy
+User=galaxy
+Group=galaxy
+ExecStart=/app/galaxy/run.sh start
+ExecReload=/app/galaxy/run.sh restart
+ExecStop=/app/galaxy/run.sh stop
+KillMode=process
+Restart=on-failure
+RestartSec=42s
+
+[Install]
+WantedBy=multi-user.target

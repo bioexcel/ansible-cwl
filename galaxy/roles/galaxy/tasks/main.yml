@@ -1,10 +1,5 @@
 ---
-# Tasks to install and configure galaxy
-
-
-# Add yarn repo.
-# Uses creates command so as not to run if file exists
-# https://stackoverflow.com/questions/53976165/importing-adding-a-yum-repo-file-using-ansible
+# Tasks to install and configure galaxy on Centos 7 or similar
 
 - name: Add Yarn repository
   yum_repository:
@@ -13,15 +8,10 @@
     description: YARN Repository
     baseurl: https://dl.yarnpkg.com/rpm/
     gpgcheck: yes
-    gpgkey: https://dl.yarnpkg.com/rpm/pubkey.gpg
-
-#- name: Add Yarn repository
-#  shell: yum-config-manager --add-repo=https://dl.yarnpkg.com/rpm/yarn.repo
-#  args:
-#    creates: /etc/yum.repos.d/yarn.repo
-#  become: yes
-#  become_user: root
-#  become_method: su
+    gpgkey: https://dl.yarnpkg.com/rpm/pubkey.gpg    
+  become: yes
+  become_user: root
+  become_method: sudo
 
 - name: Install EPEL
   yum:
@@ -29,7 +19,7 @@
     state: present
   become: yes
   become_user: root
-  become_method: su
+  become_method: sudo
 
 # Install dependencies
 # On CentOS libpq = postgresql
@@ -37,43 +27,135 @@
 
 - name: Install dependencies
   yum:
-    name: [python-devel, python-pip, gcc, make, postgresql-devel, yarn, git]
+    name: [python-devel, python-pip, gcc, make, postgresql-devel, yarn, git, docker]
   become: yes
   become_user: root
-  become_method: su
+  become_method: sudo
+
+- name: Ensure group "galaxy" exists
+  group:
+    name: galaxy
+  become: yes
+  become_user: root
+  become_method: sudo   
+
+- name: Ensure user "{{ ansible_user_id }}" is member of "galaxy" group
+  user:
+    append: yes
+    groups: galaxy
+    name: '{{ ansible_user_id }}'
+  become: yes
+  become_user: root
+  become_method: sudo   
+
+- name: Ensure user "galaxy" exist
+  user:
+    name: galaxy
+    comment: Galaxy server
+    group: galaxy
+    home: /app
+  become: yes
+  become_user: root
+  become_method: sudo   
+
+
+- name: Ensure galaxy owns home directory
+  file: 
+    path: /app # ~galaxy
+    group: galaxy
+    owner: galaxy
+    mode: u+rwX,g+rwX,o+rX
+    state: directory
+    recurse: yes
+  become: yes
+  become_user: root
+  become_method: sudo   
 
 # Clone galaxy repo:
-- name: Clone galaxy repo.
+- name: Clone galaxy repo
   git:
     repo: 'https://github.com/common-workflow-language/galaxy.git'
     dest: /app/galaxy
     depth: 1
     force: true # Ignore "Local modifications exist"
   become: yes
-  become_user: root
-  become_method: su
+  become_user: galaxy
+  become_method: sudo
 
 # Clone galaxy repo:
-- name: Clone workflow-is-cwl repo.
+- name: Clone workflow-is-cwl repo
   git:
     repo: 'https://github.com/EBI-metagenomics/workflow-is-cwl'
     dest: /app/workflow-is-cwl
     depth: 1
     force: true # Ignore "Local modifications exist"    
   become: yes
-  become_user: root
-  become_method: su
+  become_user: galaxy
+  become_method: sudo
 
 # Copy config files
 
-- name: Copy galaxy configs
+- name: Copy galaxy config and modifications
   synchronize:
     src: app/
     dest: /app/.
+    archive: no
+    recursive: yes
+## disabled become: below to avoid error 
+## "sudo: no tty present and no askpass program specified"
+##  .. we'll chown afterwards anyway
+#  become: yes
+#  become_user: root 
+#  become_method: su
+
+- name: Ensure galaxy still owns home directory
+  file: 
+    path: /app # ~galaxy
+    group: galaxy
+    owner: galaxy
+    mode: u+rwX,g+rwX,o+rX
+    state: directory
+    recurse: yes
   become: yes
   become_user: root
-  become_method: su
+  become_method: sudo
 
+# Make and start a systemd service
+- name: Add galaxy service
+  copy:
+    src: galaxy.service    
+    # FIXME: This seems like a quite Centos-specific directory
+    dest: /etc/systemd/system/network-online.target.wants/
+    owner: root
+    group: root
+    mode: 0644
+  become: yes
+  become_user: root
+  become_method: sudo
+
+
+- name: Make sure docker is running
+  systemd:
+    state: started
+    name: docker  
+  become: yes
+  become_user: root
+  become_method: sudo    
+
+- name: Make sure galaxy is running
+  systemd:
+    state: started
+    name: galaxy  
+    daemon_reload: true # we might just have installed the service above
+  become: yes
+  become_user: root
+  become_method: sudo    
+
+##  systemctl enable sshd-second.service
+
+## TODO: Follow more of guidelines from 
+# https://docs.galaxyproject.org/en/latest/admin/production.html 
+# e.g. using postgresql database
 
 #mv representation.py app/galaxy/lib/galaxy/tools/cwl/representation.py
 #mv parser.py app/galaxy/lib/galaxy/tools/cwl/parser.py
