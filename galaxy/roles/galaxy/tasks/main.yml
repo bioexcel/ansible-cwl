@@ -7,12 +7,21 @@
 # https://stackoverflow.com/questions/53976165/importing-adding-a-yum-repo-file-using-ansible
 
 - name: Add Yarn repository
-  shell: yum-config-manager --add-repo=https://dl.yarnpkg.com/rpm/yarn.repo
-  args:
-    creates: /etc/yum.repos.d/yarn.repo
-  become: yes
-  become_user: root
-  become_method: su
+  yum_repository:
+    # Adapted from https://dl.yarnpkg.com/rpm/yarn.repo 2019-07-12
+    name: yarn
+    description: YARN Repository
+    baseurl: https://dl.yarnpkg.com/rpm/
+    gpgcheck: yes
+    gpgkey: https://dl.yarnpkg.com/rpm/pubkey.gpg
+
+#- name: Add Yarn repository
+#  shell: yum-config-manager --add-repo=https://dl.yarnpkg.com/rpm/yarn.repo
+#  args:
+#    creates: /etc/yum.repos.d/yarn.repo
+#  become: yes
+#  become_user: root
+#  become_method: su
 
 - name: Install EPEL
   yum:
