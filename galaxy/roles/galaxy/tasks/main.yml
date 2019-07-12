@@ -37,7 +37,7 @@
 
 - name: Install dependencies
   yum:
-    name: [python-devel, python-pip, gcc, make, postgresql-devel, yarn]
+    name: [python-devel, python-pip, gcc, make, postgresql-devel, yarn, git]
   become: yes
   become_user: root
   become_method: su
@@ -48,16 +48,18 @@
     repo: 'https://github.com/common-workflow-language/galaxy.git'
     dest: /app/galaxy
     depth: 1
+    force: true # Ignore "Local modifications exist"
   become: yes
   become_user: root
   become_method: su
 
 # Clone galaxy repo:
-- name: Clone galaxy repo.
+- name: Clone workflow-is-cwl repo.
   git:
     repo: 'https://github.com/EBI-metagenomics/workflow-is-cwl'
     dest: /app/workflow-is-cwl
     depth: 1
+    force: true # Ignore "Local modifications exist"    
   become: yes
   become_user: root
   become_method: su
@@ -91,26 +93,6 @@
 
 
 #Installyarnrepo
-
-#Clonegalaxyrepo
-- name: clone galaxy repo
-  git:
-    repo: 'https://github.com/common-workflow-language/galaxy.git'
-    dest: /app/galaxy
-  become: yes
-  become_user: root
-  become_method: su
-
-
-
-#- name: Clone galaxy repo.
-#  git:
-#    repo: 'https://github.com/common-workflow-language/galaxy.git'
-#    dest: /app/galaxy
-#    depth: 1
-
-
-
 #version:release-0.22
 
 
