@@ -4,40 +4,44 @@
 
 A series of playbooks to install and test various [implementations of CWL](https://www.commonwl.org/#Implementations)
 
-## CWL Reference Runner
 
-### Installation
+## Installation
 
-Installation is simple, without issues for CWL.  Just issue:
+### CWL Runner
 
 ```
 ansible-playbook cwl.yml
 ```
 
-This should ask for a root password to run (note, this uses `su` and not `sudo`).
+### Toil
 
-### Running
+```
+ansible-playbook toil.yml
+```
+
+### Reana
+
+```
+ansible-playbook reana.yml
+```
+
+### Airflow
+
+```
+ansible-playbook airflow.yml
+```
+
+
+## Running an implementation
+
+### CWL
 
 ```
 cd ~/cwl_test
 bin/actvate 
 toil-cwl-runner example.cwl example-job.yaml
 ```
-
-
-## Toil
-
-### Installation
-
-Installation is simple, without issues for toil.  Just issue:
-
-```
-ansible-playbook toil.yml
-```
-
-This should ask for a root password to run (note, this uses `su` and not `sudo`).
-
-### Running
+### Toil
 
 ```
 cd ~/toil_test
@@ -45,36 +49,11 @@ bin/actvate
 toil-cwl-runner example.cwl example-job.yaml
 ```
 
-## Reana
-
-### Installation
-
-Installation is simple, without issues for reana.  Just issue:
-
-```
-ansible-playbook reana.yml
-```
-
-This should ask for a root password to run (note, this uses `su` and not `sudo`).
-
-### Running
+### Reana
 
 ? To do
 
-
-## Airflow
-
-### Installation
-
-Installation is simple, without issues for airflow.  Just issue:
-
-```
-ansible-playbook airflow.yml
-```
-
-This should ask for a root password to run (note, this uses `su` and not `sudo`).
-
-### Running
+### Airflow
 
 ```
 cd ~/airflow_test
