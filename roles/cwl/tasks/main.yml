@@ -32,9 +32,9 @@
     extra_args: --user
 
 
-# Install cwlref-runner
+# Install cwlref-runner in venv
 
-- name: install toil in virtualenv
+- name: install cwl in virtualenv
   pip:
     name: cwlref-runner
     virtualenv: ~/cwl_test
