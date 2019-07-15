@@ -40,6 +40,8 @@
   become_user: root
   become_method: sudo   
 
+# This is just a trick so that the synchronize: stage
+# later can install files without needing become: yes
 - name: Ensure user "{{ ansible_user_id }}" is member of "galaxy" group
   user:
     append: yes
@@ -176,7 +178,8 @@
 
 
 # TODO: install and enable galaxy.service for firewalld  
-# so that :8080 is open
+# into /etc/firewalld/services and enable it with cmd-firewalld
+# equivalent so that :8080 is open
 # see https://docs.ansible.com/ansible/latest/modules/firewalld_module.html#firewalld-module
 
          
