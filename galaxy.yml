@@ -1,4 +1,4 @@
 ---
-- hosts: localhost
+- hosts: 10.12.156.3 #10.186.125.105
   roles:
     - galaxy

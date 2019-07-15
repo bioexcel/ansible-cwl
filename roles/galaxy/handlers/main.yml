@@ -1,0 +1,18 @@
+---
+# https://docs.ansible.com/ansible/latest/user_guide/playbooks_intro.html#handlers-running-operations-on-change
+- name: restart galaxy
+  listen: "restart galaxy"
+  service:
+    name: galaxy
+    state: restarted
+  become: yes
+  become_user: root
+  become_method: sudo            
+- name: restart docker
+  listen: "restart docker"    
+  service:
+    name: docker
+    state: restarted
+  become: yes
+  become_user: root
+  become_method: sudo     

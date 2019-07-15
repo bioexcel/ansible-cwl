@@ -1,18 +1,17 @@
 ---
-# Tasks to install and configure galaxy
-
-
-# Add yarn repo.
-# Uses creates command so as not to run if file exists
-# https://stackoverflow.com/questions/53976165/importing-adding-a-yum-repo-file-using-ansible
+# Tasks to install and configure galaxy on Centos 7 or similar
 
 - name: Add Yarn repository
-  shell: yum-config-manager --add-repo=https://dl.yarnpkg.com/rpm/yarn.repo
-  args:
-    creates: /etc/yum.repos.d/yarn.repo
+  yum_repository:
+    # Adapted from https://dl.yarnpkg.com/rpm/yarn.repo 2019-07-12
+    name: yarn
+    description: YARN Repository
+    baseurl: https://dl.yarnpkg.com/rpm/
+    gpgcheck: yes
+    gpgkey: https://dl.yarnpkg.com/rpm/pubkey.gpg    
   become: yes
   become_user: root
-  become_method: su
+  become_method: sudo
 
 
 # Install EPEL repo, needed for pip and other packages.
@@ -23,7 +22,7 @@
     state: present
   become: yes
   become_user: root
-  become_method: su
+  become_method: sudo
 
 
 # Install dependencies
@@ -32,42 +31,103 @@
 
 - name: Install dependencies
   yum:
-    name: [python-devel, python-pip, gcc, make, postgresql-devel, yarn]
+    name: [python-devel, python-pip, gcc, make, postgresql-devel, yarn, bzip2, git, docker]
+  notify: "restart galaxy" # in case something upgrades
   become: yes
   become_user: root
-  become_method: su
+  become_method: sudo
+
+- name: Ensure group "galaxy" exists
+  group:
+    name: galaxy
+  become: yes
+  become_user: root
+  become_method: sudo   
+
+# This is just a trick so that the synchronize: stage
+# later can install files without needing become: yes
+- name: Ensure user "{{ ansible_user_id }}" is member of "galaxy" group
+  user:
+    append: yes
+    groups: galaxy
+    name: '{{ ansible_user_id }}'
+  become: yes
+  become_user: root
+  become_method: sudo   
+
+- name: Ensure user "galaxy" exist
+  user:
+    name: galaxy
+    comment: Galaxy server
+    group: galaxy
+    home: /app
+  become: yes
+  become_user: root
+  become_method: sudo   
+
+
+- name: Ensure galaxy owns home directory
+  file: 
+    path: /app # ~galaxy
+    group: galaxy
+    owner: galaxy
+    mode: u+rwX,g+rwX,o+rX
+    state: directory
+    recurse: yes
+  become: yes
+  become_user: root
+  become_method: sudo   
 
 
 # Clone galaxy repo:
-
-- name: Clone galaxy repo.
+- name: Clone galaxy repo
+  notify: "restart galaxy"
   git:
     repo: 'https://github.com/common-workflow-language/galaxy.git'
     dest: /app/galaxy
     depth: 1
+    force: true # Ignore "Local modifications exist"
   become: yes
-  become_user: root
-  become_method: su
+  become_user: galaxy
+  become_method: sudo
 
 
 # Clone galaxy repo:
-
 - name: Clone galaxy repo.
   git:
     repo: 'https://github.com/EBI-metagenomics/workflow-is-cwl'
     dest: /app/workflow-is-cwl
     depth: 1
+    force: true # Ignore "Local modifications exist"    
   become: yes
-  become_user: root
-  become_method: su
+  become_user: galaxy
+  become_method: sudo
 
 
 # Copy config files for galaxy
 
-- name: Copy galaxy configs
+- name: Copy galaxy config and modifications
+  notify: "restart galaxy"
   synchronize:
     src: app/
     dest: /app/.
+    archive: no
+    recursive: yes
+## disabled become: below to avoid error 
+## "sudo: no tty present and no askpass program specified"
+##  .. we'll chown afterwards anyway
+#  become: yes
+#  become_user: root 
+#  become_method: su
+
+- name: Ensure galaxy still owns home directory
+  file: 
+    path: /app # ~galaxy
+    group: galaxy
+    owner: galaxy
+    mode: u+rwX,g+rwX,o+rX
+    state: directory
+    recurse: yes
   become: yes
   become_user: root
   become_method: su
@@ -80,14 +140,74 @@
   git:
     repo: 'https://github.com/common-workflow-language/galaxy.git'
     dest: /app/galaxy
+
+# Pre-install galaxy dependencies using virtualenv
+# NOTE: Galaxy will also do this from run.sh
+# when started as a service, we do this before to
+# simplify service startup and detect any missing
+# native dependencies.
+# TODO: There is a risk that this may update a galaxy
+# that is already running, but this problem
+# also exist with the git clone update above
+- name: Install Galaxy dependencies
+  notify: "restart galaxy"
+  pip: 
+    requirements: /app/galaxy/requirements.txt
+    virtualenv: /app/galaxy/.venv
+    # update from /app/galaxy/scripts/common_startup.sh 
+    # for GALAXY_WHEELS_INDEX_URL and PYPI_INDEX_URL
+    extra_args:  --index-url "https://wheels.galaxyproject.org/simple" --extra-index-url "https://pypi.python.org/simple"
+  become: yes
+  become_user: galaxy
+  become_method: sudo  
+
+# Make and start a systemd service
+- name: Add galaxy service
+  copy:
+    src: galaxy.service    
+    # FIXME: This seems like a quite Centos-specific directory
+    dest: /etc/systemd/system/network-online.target.wants/
+    owner: root
+    group: root
+    mode: 0644
   become: yes
   become_user: root
-  become_method: su
+  become_method: sudo
+
+- name: Make sure docker is running
+  systemd:
+    state: started
+    name: docker  
+  become: yes
+  become_user: root
+  become_method: sudo    
+
+- name: Make sure galaxy is running
+  systemd:
+   # TODO: use Ansible handler script to force "restarted" if any of the above changed the install
+    state: started 
+    name: galaxy  
+    daemon_reload: true # we might just have installed the service above
+  become: yes
+  become_user: root
+  become_method: sudo    
 
 
-# Running the files.
+# TODO: install and enable galaxy.service for firewalld  
+# into /etc/firewalld/services and enable it with cmd-firewalld
+# equivalent so that :8080 is open
+# see https://docs.ansible.com/ansible/latest/modules/firewalld_module.html#firewalld-module
 
-#Starupcommands:
+         
+
+## TODO: Follow more of guidelines from 
+# https://docs.galaxyproject.org/en/latest/admin/production.html 
+# e.g. using postgresql database
+
+## TODO: Integrate more of Galaxy setup to simplify 
+## service startup from run.sh
+
+#Startup commands:
 #-name:commonstartup
 #command:cd/app/galaxy&&./scripts/common_startup.sh
 
