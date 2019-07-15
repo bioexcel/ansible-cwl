@@ -1,0 +1,67 @@
+---
+# Tasks to install and configure CWL-runner
+
+
+# Install EPEL repo, needed for pip and other packages.
+
+- name: Install EPEL
+  yum:
+    name: ['epel-release']
+    state: present
+  become: yes
+  become_user: root
+  become_method: su
+
+
+# Install dependencies for CWL-runner
+
+- name: Install dependencies for cwl
+  yum:
+    name: ['python2-pip', 'python2-devel']
+    state: present
+  become: yes
+  become_user: root
+  become_method: su
+
+
+# Install virtualenv using pip
+
+- name: install virtualenv
+  pip:
+    name: virtualenv
+    extra_args: --user
+
+
+# Install cwlref-runner
+
+- name: install toil in virtualenv
+  pip:
+    name: cwlref-runner
+    virtualenv: ~/cwl_test
+    virtualenv_python: python2.7
+
+
+# Create files to run hello world.
+
+- name: example-job.yaml
+  copy:
+    dest: ~/cwl_test/example-job.yaml
+    content: |
+      message: Hello world!
+
+- name: example.cwl
+  copy:
+    dest: ~/cwl_test/example.cwl
+    content: |
+      cwlVersion: v1.0
+      class: CommandLineTool
+      baseCommand: echo
+      stdout: output.txt
+      inputs:
+        message:
+          type: string
+          inputBinding:
+            position: 1
+      outputs:
+        output:
+          type: stdout
