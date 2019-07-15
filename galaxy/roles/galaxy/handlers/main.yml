@@ -1,0 +1,17 @@
+---
+- name: restart galaxy
+  listen: "restart galaxy"
+  service:
+    name: galaxy
+    state: restarted
+  become: yes
+  become_user: root
+  become_method: sudo            
+- name: restart docker
+  listen: "restart docker"    
+  service:
+    name: docker
+    state: restarted
+  become: yes
+  become_user: root
+  become_method: sudo     

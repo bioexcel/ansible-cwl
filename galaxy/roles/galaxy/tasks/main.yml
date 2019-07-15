@@ -27,7 +27,8 @@
 
 - name: Install dependencies
   yum:
-    name: [python-devel, python-pip, gcc, make, postgresql-devel, yarn, git, docker]
+    name: [python-devel, python-pip, gcc, make, postgresql-devel, yarn, bzip2, git, docker]
+  notify: "restart galaxy" # in case something upgrades
   become: yes
   become_user: root
   become_method: sudo
@@ -73,6 +74,7 @@
 
 # Clone galaxy repo:
 - name: Clone galaxy repo
+  notify: "restart galaxy"
   git:
     repo: 'https://github.com/common-workflow-language/galaxy.git'
     dest: /app/galaxy
@@ -96,6 +98,7 @@
 # Copy config files
 
 - name: Copy galaxy config and modifications
+  notify: "restart galaxy"
   synchronize:
     src: app/
     dest: /app/.
@@ -120,6 +123,26 @@
   become_user: root
   become_method: sudo
 
+# Pre-install galaxy dependencies using virtualenv
+# NOTE: Galaxy will also do this from run.sh
+# when started as a service, we do this before to
+# simplify service startup and detect any missing
+# native dependencies.
+# TODO: There is a risk that this may update a galaxy
+# that is already running, but this problem
+# also exist with the git clone update above
+- name: Install Galaxy dependencies
+  notify: "restart galaxy"
+  pip: 
+    requirements: /app/galaxy/requirements.txt
+    virtualenv: /app/galaxy/.venv
+    # update from /app/galaxy/scripts/common_startup.sh 
+    # for GALAXY_WHEELS_INDEX_URL and PYPI_INDEX_URL
+    extra_args:  --index-url "https://wheels.galaxyproject.org/simple" --extra-index-url "https://pypi.python.org/simple"
+  become: yes
+  become_user: galaxy
+  become_method: sudo  
+
 # Make and start a systemd service
 - name: Add galaxy service
   copy:
@@ -133,7 +156,6 @@
   become_user: root
   become_method: sudo
 
-
 - name: Make sure docker is running
   systemd:
     state: started
@@ -144,41 +166,25 @@
 
 - name: Make sure galaxy is running
   systemd:
-    state: started
+   # TODO: use Ansible handler script to force "restarted" if any of the above changed the install
+    state: started 
     name: galaxy  
     daemon_reload: true # we might just have installed the service above
   become: yes
   become_user: root
   become_method: sudo    
 
-##  systemctl enable sshd-second.service
+# https://docs.ansible.com/ansible/latest/user_guide/playbooks_intro.html#handlers-running-operations-on-change
+         
 
 ## TODO: Follow more of guidelines from 
 # https://docs.galaxyproject.org/en/latest/admin/production.html 
 # e.g. using postgresql database
 
-#mv representation.py app/galaxy/lib/galaxy/tools/cwl/representation.py
-#mv parser.py app/galaxy/lib/galaxy/tools/cwl/parser.py
-#mv wrappers.py app/galaxy/lib/galaxy/tools/wrappers.py
-#mv job_conf.xml app/galaxy/config/job_conf.xml
-#mv dependency_resolvers_conf.xml app/galaxy/config/dependency_resolvers_conf.xml
-#mv galaxy.yml app/galaxy/config/galaxy.yml
-#mv tool_conf.xml app/galaxy/config/tool_conf.xml
-#mv welcome.html app/galaxy/static/welcome.html
-#mv start.sh app/start.sh
-#mv Diamon.makedb-v0.9.21.cwl app/workflow-is-cwl/tools/Diamond/Diamon.makedb-v0.9.21.cwl
-#mv create_user.py app/galaxy/create_user.py
-#mv workflows.py app/galaxy/lib/galaxy/managers/workflows.py
-#mv upload_material.py app
-#mv start_galaxy_and_upload_material.sh app
-#mv process.py app/galaxy/.venv/local/lib/python2.7/site-packages/cwltool/process.py
+## TODO: Integrate more of Galaxy setup to simplify 
+## service startup from run.sh
 
-
-#Installyarnrepo
-#version:release-0.22
-
-
-#Starupcommands:
+#Startup commands:
 #-name:commonstartup
 #command:cd/app/galaxy&&./scripts/common_startup.sh
 
