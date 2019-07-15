@@ -174,7 +174,11 @@
   become_user: root
   become_method: sudo    
 
-# https://docs.ansible.com/ansible/latest/user_guide/playbooks_intro.html#handlers-running-operations-on-change
+
+# TODO: install and enable galaxy.service for firewalld  
+# so that :8080 is open
+# see https://docs.ansible.com/ansible/latest/modules/firewalld_module.html#firewalld-module
+
          
 
 ## TODO: Follow more of guidelines from 
