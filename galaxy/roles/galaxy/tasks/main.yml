@@ -14,6 +14,9 @@
   become_user: root
   become_method: su
 
+
+# Install EPEL repo, needed for pip and other packages.
+
 - name: Install EPEL
   yum:
     name: ['epel-release']
@@ -21,6 +24,7 @@
   become: yes
   become_user: root
   become_method: su
+
 
 # Install dependencies
 # On CentOS libpq = postgresql
@@ -33,7 +37,9 @@
   become_user: root
   become_method: su
 
+
 # Clone galaxy repo:
+
 - name: Clone galaxy repo.
   git:
     repo: 'https://github.com/common-workflow-language/galaxy.git'
@@ -43,7 +49,9 @@
   become_user: root
   become_method: su
 
+
 # Clone galaxy repo:
+
 - name: Clone galaxy repo.
   git:
     repo: 'https://github.com/EBI-metagenomics/workflow-is-cwl'
@@ -53,7 +61,8 @@
   become_user: root
   become_method: su
 
-# Copy config files
+
+# Copy config files for galaxy
 
 - name: Copy galaxy configs
   synchronize:
@@ -64,24 +73,7 @@
   become_method: su
 
 
-#mv representation.py app/galaxy/lib/galaxy/tools/cwl/representation.py
-#mv parser.py app/galaxy/lib/galaxy/tools/cwl/parser.py
-#mv wrappers.py app/galaxy/lib/galaxy/tools/wrappers.py
-#mv job_conf.xml app/galaxy/config/job_conf.xml
-#mv dependency_resolvers_conf.xml app/galaxy/config/dependency_resolvers_conf.xml
-#mv galaxy.yml app/galaxy/config/galaxy.yml
-#mv tool_conf.xml app/galaxy/config/tool_conf.xml
-#mv welcome.html app/galaxy/static/welcome.html
-#mv start.sh app/start.sh
-#mv Diamon.makedb-v0.9.21.cwl app/workflow-is-cwl/tools/Diamond/Diamon.makedb-v0.9.21.cwl
-#mv create_user.py app/galaxy/create_user.py
-#mv workflows.py app/galaxy/lib/galaxy/managers/workflows.py
-#mv upload_material.py app
-#mv start_galaxy_and_upload_material.sh app
-#mv process.py app/galaxy/.venv/local/lib/python2.7/site-packages/cwltool/process.py
-
-
-#Installyarnrepo
+#Install yarn repo
 
 #Clonegalaxyrepo
 - name: clone galaxy repo
@@ -93,17 +85,7 @@
   become_method: su
 
 
-
-#- name: Clone galaxy repo.
-#  git:
-#    repo: 'https://github.com/common-workflow-language/galaxy.git'
-#    dest: /app/galaxy
-#    depth: 1
-
-
-
-#version:release-0.22
-
+# Running the files.
 
 #Starupcommands:
 #-name:commonstartup
