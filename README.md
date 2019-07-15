@@ -41,7 +41,7 @@ ansible-playbook airflow.yml
 ```
 cd ~/cwl_test
 source bin/actvate 
-toil-cwl-runner example.cwl example-job.yaml
+cwl-runner example.cwl example-job.yaml
 ```
 ### Toil
 
