@@ -17,19 +17,11 @@
 
 - name: Install dependencies for cwl
   yum:
-    name: ['python2-pip', 'python2-devel']
+    name: ['python2-pip', 'python2-devel', 'python-virtualenv']
     state: present
   become: yes
   become_user: root
   become_method: su
-
-
-# Install virtualenv using pip
-
-- name: install virtualenv
-  pip:
-    name: virtualenv
-    extra_args: --user
 
 
 # Install toil in venv
