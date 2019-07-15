@@ -40,14 +40,14 @@ ansible-playbook airflow.yml
 
 ```
 cd ~/cwl_test
-bin/actvate 
+source bin/actvate 
 toil-cwl-runner example.cwl example-job.yaml
 ```
 ### Toil
 
 ```
 cd ~/toil_test
-bin/actvate 
+source bin/actvate 
 toil-cwl-runner example.cwl example-job.yaml
 ```
 
@@ -63,7 +63,7 @@ reana-cluster status
 # set environment variables for reana-client
 eval $(reana-cluster env --include-admin-token) # since you are admin
 cd ~/reana_test
-bin/actvate
+source bin/actvate
 reana-client create -n my-analysis
 export REANA_WORKON=my-analysis
 # upload input code and data to the workspace
