@@ -4,25 +4,6 @@
 
 A series of playbooks to install and test various [implementations of CWL](https://www.commonwl.org/#Implementations)
 
-toil
-----
-Deploy and test:
-
-```
-ansible-playbook ansible-cwl/toil/playbook.yml && cd ~/toil_test && bin/activate && toil-cwl-runner example.cwl example-job.yaml
-```
-
-
-galaxy
------
-
-```
-ansible-cwl/galaxy/
-ansible-playbook galaxy.yml -K
-```
-
-
-
 ## CWL Reference Runner
 
 ### Installation
@@ -63,4 +44,3 @@ cd ~/toil_test
 bin/actvate 
 toil-cwl-runner example.cwl example-job.yaml
 ```
-
