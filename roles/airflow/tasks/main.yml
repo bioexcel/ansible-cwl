@@ -1,0 +1,81 @@
+---
+# Tasks to install airflow
+
+
+# Install EPEL repo, needed for pip and other packages.
+
+- name: Install EPEL
+  yum:
+    name: ['epel-release']
+    state: present
+  become: yes
+  become_user: root
+  become_method: su
+
+
+# Install dependencies for airflow
+
+- name: Install dependencies for airflow
+  yum:
+    name: ['python2-pip', 'python2-devel']
+    state: present
+  become: yes
+  become_user: root
+  become_method: su
+
+
+# Install virtualenv using pip
+
+- name: install virtualenv
+  pip:
+    name: virtualenv
+    extra_args: --user
+
+
+# Install airflow dependencies in virtual env
+
+- name: install airflow dependencies
+  pip:
+    name: psutil<5.0.0,>=4.2.0'
+    name: six
+    name: pythondns
+    name: python-ldap
+    name: setuptools
+    virtualenv: ~/airflow_test
+    virtualenv_python: python2.7
+
+
+# Install airflow in virtual env
+
+- name: install airflow in virtualenv
+  pip:
+    name: cwl-airflow
+    virtualenv: ~/airflow_test
+    virtualenv_python: python2.7
+    extra_args: "--find-links https://michael-kotliar.github.io/cwl-airflow-wheels"
+
+
+# Create files to run hello world.
+
+- name: example-job.yaml
+  copy:
+    dest: ~/airflow_test/example-job.yaml
+    content: |
+      message: Hello world!
+
+- name: example.cwl
+  copy:
+    dest: ~/airflow_test/example.cwl
+    content: |
+      cwlVersion: v1.0
+      class: CommandLineTool
+      baseCommand: echo
+      stdout: output.txt
+      inputs:
+        message:
+          type: string
+          inputBinding:
+            position: 1
+      outputs:
+        output:
+          type: stdout

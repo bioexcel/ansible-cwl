@@ -44,3 +44,42 @@ cd ~/toil_test
 bin/actvate 
 toil-cwl-runner example.cwl example-job.yaml
 ```
+
+## Reana
+
+### Installation
+
+Installation is simple, without issues for reana.  Just issue:
+
+```
+ansible-playbook reana.yml
+```
+
+This should ask for a root password to run (note, this uses `su` and not `sudo`).
+
+### Running
+
+? To do
+
+
+## Airflow
+
+### Installation
+
+Installation is simple, without issues for airflow.  Just issue:
+
+```
+ansible-playbook airflow.yml
+```
+
+This should ask for a root password to run (note, this uses `su` and not `sudo`).
+
+### Running
+
+```
+cd ~/airflow_test
+source bin/activate
+cwl-airflow init
+(airflow scheduler &> /dev/null &) && (airflow webserver&> /dev/null &) && cwl-airflow submit example.cwl example-job.yaml
+```
+
