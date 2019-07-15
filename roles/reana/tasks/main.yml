@@ -1,0 +1,5 @@
+---
+# Main file for REANA role.
+
+import_tasks: install_kubernetes.yml
+import_tasks: install_reana.yml

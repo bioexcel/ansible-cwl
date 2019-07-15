@@ -1,0 +1,88 @@
+---
+# Tasks to install and configure REANA
+## https://reana.readthedocs.io/en/latest/gettingstarted.html#step-two-install-reana-cluster
+
+
+# EPEL needed for many of the dependencies.
+
+- name: Install EPEL
+  yum:
+    name: ['epel-release']
+    state: present
+  become: yes
+  become_user: root
+  become_method: su
+
+
+# Install depenencies for REANA
+
+- name: Install reana dependencies
+  yum:
+    name: ['python36-pip', 'python36-devel', 'python36', 'gcc', 'make']
+    state: present
+  become: yes
+  #become_user: root
+  #become_method: su
+
+
+# Install virtualenv
+
+- name: install virtualenv
+  pip:
+    name: virtualenv
+    extra_args: --user
+    executable: pip3
+
+
+# Install REANA using pip
+
+- name: install reana in virtualenv
+  pip:
+    name: ['reana-client', 'reana-cluster']
+    virtualenv: ~/reana_cwl
+    virtualenv_python: python3.6
+
+
+# Create files to run hello world.
+
+- name: example-job.yaml
+  copy:
+    dest: ~/reana_test/example-job.yaml
+    content: |
+      message: Hello world!
+
+- name: example.cwl
+  copy:
+    dest: ~/reana_test/example.cwl
+    content: |
+      cwlVersion: v1.0
+      class: CommandLineTool
+      baseCommand: echo
+      stdout: output.txt
+      inputs:
+        message:
+          type: string
+          inputBinding:
+            position: 1
+      outputs:
+        output:
+          type: stdout
+
+
+# Reana specific files.
+
+- name: reana.yaml
+  copy:
+    dest: ~/reana_cwl/reana.yaml
+    content: |
+      version: 0.4.0
+      inputs:
+        parameters:
+          input: example-job.yaml
+      workflow:
+        type: cwl
+        file: example.cwl
+      outputs:
+        output:
+          files:
+            - output.txt
