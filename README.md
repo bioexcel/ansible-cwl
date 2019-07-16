@@ -82,7 +82,9 @@ reana-client download
 ```
 cd ~/airflow_test
 source bin/activate
-cwl-airflow init
-(airflow scheduler &> /dev/null &) && (airflow webserver&> /dev/null &) && cwl-airflow submit example.cwl example-job.yaml
+cwl-tool example.cwl example-job.yaml
 ```
+... #cwl-airflow init
+... #(airflow scheduler &> /dev/null &) && (airflow webserver&> /dev/null &) && cwl-airflow submit example.cwl example-job.yaml
+
 

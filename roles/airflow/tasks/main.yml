@@ -17,7 +17,8 @@
 
 - name: Install dependencies for airflow
   yum:
-    name: ['python2-pip', 'python2-devel', 'python-virtualenv']
+    name: ['python2-pip', 'python2-devel', 'python-virtualenv', 'mariadb']
+    # libmysqlclient-dev in ubuntu
     state: present
   become: yes
   become_user: root
