@@ -54,6 +54,7 @@ toil-cwl-runner example.cwl example-job.yaml
 ### Reana
 
 ? To do
+? Not working.  Install seems fine, but does not start.
 
 ```
 helm init
