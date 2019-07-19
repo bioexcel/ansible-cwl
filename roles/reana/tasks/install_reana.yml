@@ -18,20 +18,11 @@
 
 - name: Install reana dependencies
   yum:
-    name: ['python36-pip', 'python36-devel', 'python36', 'gcc', 'make']
+    name: ['python36-pip', 'python36-devel', 'python36', 'gcc', 'make', 'python-virtualenv']
     state: present
   become: yes
-  #become_user: root
-  #become_method: su
-
-
-# Install virtualenv
-
-- name: install virtualenv
-  pip:
-    name: virtualenv
-    extra_args: --user
-    executable: pip3
+  become_user: root
+  become_method: su
 
 
 # Install REANA using pip
@@ -39,7 +30,7 @@
 - name: install reana in virtualenv
   pip:
     name: ['reana-client', 'reana-cluster']
-    virtualenv: ~/reana_cwl
+    virtualenv: ~/reana_test
     virtualenv_python: python3.6
 
 
@@ -73,7 +64,7 @@
 
 - name: reana.yaml
   copy:
-    dest: ~/reana_cwl/reana.yaml
+    dest: ~/reana_test/reana.yaml
     content: |
       version: 0.4.0
       inputs:
