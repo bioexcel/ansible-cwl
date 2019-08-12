@@ -77,6 +77,7 @@ reana-client status
 reana-client ls
 # download output results
 reana-client download
+```
 
 ### Airflow
 
