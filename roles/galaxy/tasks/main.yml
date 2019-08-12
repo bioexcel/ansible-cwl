@@ -31,7 +31,7 @@
 
 - name: Install dependencies
   yum:
-    name: [python-devel, python-pip, gcc, make, postgresql-devel, yarn, bzip2, git, docker]
+    name: [python-devel, python-pip, python-virtualenv, gcc, make, postgresql-devel, yarn, bzip2, git, docker]
   notify: "restart galaxy" # in case something upgrades
   become: yes
   become_user: root
@@ -130,16 +130,9 @@
     recurse: yes
   become: yes
   become_user: root
-  become_method: su
+  become_method: sudo
 
 
-#Install yarn repo
-
-#Clonegalaxyrepo
-- name: clone galaxy repo
-  git:
-    repo: 'https://github.com/common-workflow-language/galaxy.git'
-    dest: /app/galaxy
 
 # Pre-install galaxy dependencies using virtualenv
 # NOTE: Galaxy will also do this from run.sh
