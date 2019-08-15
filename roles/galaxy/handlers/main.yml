@@ -7,7 +7,8 @@
     state: restarted
   become: yes
   become_user: root
-  become_method: sudo            
+  become_method: su
+  
 - name: restart docker
   listen: "restart docker"    
   service:
@@ -15,4 +16,4 @@
     state: restarted
   become: yes
   become_user: root
-  become_method: sudo     
+  become_method: su
