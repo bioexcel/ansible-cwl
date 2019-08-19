@@ -10,8 +10,6 @@
     gpgcheck: yes
     gpgkey: https://dl.yarnpkg.com/rpm/pubkey.gpg    
   become: yes
-  #become_user: root
-  #become_method: su
 
 
 # Install EPEL repo, needed for pip and other packages.
@@ -21,16 +19,13 @@
     name: ['epel-release']
     state: present
   become: yes
-  #become_user: root
-  #become_method: su
+
 
 - name: Install python dependencies
   yum:
     name: ['python36-pip', 'python36-devel', 'python36', 'gcc', 'make', 'python-virtualenv']
     state: present
   become: yes
-  #become_user: root
-  #become_method: su
 
 
 # Install dependencies
@@ -42,15 +37,13 @@
     name: [python-devel, python-pip, gcc, make, postgresql-devel, yarn, bzip2, git, docker]
   notify: "restart galaxy" # in case something upgrades
   become: yes
-  #become_user: root
-  #become_method: su
+
 
 - name: Ensure group "galaxy" exists
   group:
     name: galaxy
   become: yes
-  become_user: root
-  become_method: su   
+
 
 # This is just a trick so that the synchronize: stage
 # later can install files without needing become: yes
@@ -60,8 +53,7 @@
     groups: galaxy
     name: '{{ ansible_user_id }}'
   become: yes
-  #become_user: root
-  #become_method: su   
+
 
 - name: Ensure user "galaxy" exist
   user:
@@ -71,8 +63,6 @@
     home: /app
     password: $6$0IrkgawtZq3P2WB5$XGAVMT9x8OK.giWYSUDT/W9UDIkr.m9c89SnrcGhDQpno/49bQ17ZsDeQvWusKr4aqKPTBELRvKnCk8TDLazP.
   become: yes
-  #become_user: root
-  #become_method: su   
 
 
 - name: Ensure galaxy owns home directory
@@ -84,8 +74,6 @@
     state: directory
     recurse: yes
   become: yes
-  #become_user: root
-  #become_method: su   
 
 
 # Clone galaxy repo:
@@ -98,7 +86,6 @@
     force: true # Ignore "Local modifications exist"
   become: yes
   become_user: galaxy
-  #become_method: su
 
 
 # Clone galaxy repo:
@@ -110,7 +97,6 @@
     force: true # Ignore "Local modifications exist"    
   become: yes
   become_user: galaxy
-  #become_method: su
 
 
 # Copy config files for galaxy
@@ -126,8 +112,6 @@
 ## "sudo: no tty present and no askpass program specified"
 ##  .. we'll chown afterwards anyway
 #  become: yes
-#  become_user: root 
-#  become_method: su
 
 - name: Ensure galaxy still owns home directory
   file: 
@@ -138,8 +122,6 @@
     state: directory
     recurse: yes
   become: yes
-  #become_user: root
-  #become_method: su
 
 
 #Install yarn repo
@@ -152,7 +134,7 @@
     force: true
   become: yes
   become_user: galaxy
-  #become_method: su
+
 
 # Pre-install galaxy dependencies using virtualenv
 # NOTE: Galaxy will also do this from run.sh
@@ -172,7 +154,7 @@
     extra_args:  --index-url "https://wheels.galaxyproject.org/simple" --extra-index-url "https://pypi.python.org/simple"
   become: yes
   become_user: galaxy
-  #become_method: su  
+
 
 # Make and start a systemd service
 - name: Add galaxy service
@@ -184,16 +166,14 @@
     group: root
     mode: 0644
   become: yes
-  #become_user: root
-  #become_method: su
+
 
 - name: Make sure docker is running
   systemd:
     state: started
     name: docker  
   become: yes
-  #become_user: root
-  #become_method: su    
+
 
 - name: Make sure galaxy is running
   systemd:
@@ -202,8 +182,6 @@
     name: galaxy  
     daemon_reload: true # we might just have installed the service above
   become: yes
-  #become_user: root
-  #become_method: su    
 
 
 # TODO: install and enable galaxy.service for firewalld  
