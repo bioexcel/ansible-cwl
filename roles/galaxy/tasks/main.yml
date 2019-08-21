@@ -23,35 +23,8 @@
 
 - name: Install python dependencies
   yum:
-    name: ['python36-pip', 'python36-devel', 'python36', 'gcc', 'make', 'python-virtualenv']
+    name: [python36-pip, python36-devel, python36, gcc, make, python36-virtualenv, postgresql-devel, yarn, bzip2, git, docker]
     state: present
-  become: yes
-
-
-# Install dependencies
-# On CentOS libpq = postgresql
-# https://serverfault.com/questions/316703/how-to-install-libpq-dev-on-centos-5-5
-
-- name: Install dependencies
-  yum:
-    name: [python-devel, python-pip, gcc, make, postgresql-devel, yarn, bzip2, git, docker]
-  notify: "restart galaxy" # in case something upgrades
-  become: yes
-
-
-- name: Ensure group "galaxy" exists
-  group:
-    name: galaxy
-  become: yes
-
-
-# This is just a trick so that the synchronize: stage
-# later can install files without needing become: yes
-- name: Ensure user "{{ ansible_user_id }}" is member of "galaxy" group
-  user:
-    append: yes
-    groups: galaxy
-    name: '{{ ansible_user_id }}'
   become: yes
 
 
@@ -59,20 +32,9 @@
   user:
     name: galaxy
     comment: Galaxy server
-    group: galaxy
+    #group: galaxy
     home: /app
     password: $6$0IrkgawtZq3P2WB5$XGAVMT9x8OK.giWYSUDT/W9UDIkr.m9c89SnrcGhDQpno/49bQ17ZsDeQvWusKr4aqKPTBELRvKnCk8TDLazP.
-  become: yes
-
-
-- name: Ensure galaxy owns home directory
-  file: 
-    path: /app # ~galaxy
-    group: galaxy
-    owner: galaxy
-    mode: u+rwX,g+rwX,o+rX
-    state: directory
-    recurse: yes
   become: yes
 
 
@@ -82,58 +44,23 @@
   git:
     repo: 'https://github.com/common-workflow-language/galaxy.git'
     dest: /app/galaxy
-    depth: 1
-    force: true # Ignore "Local modifications exist"
+    #depth: 1
+    #force: true # Ignore "Local modifications exist"
   become: yes
   become_user: galaxy
 
 
-# Clone galaxy repo:
-- name: Clone galaxy repo.
+# Clone workflow-is-cwl repo:
+- name: Clone workflow-is-cwl repo.
   git:
     repo: 'https://github.com/EBI-metagenomics/workflow-is-cwl'
     dest: /app/workflow-is-cwl
-    depth: 1
-    force: true # Ignore "Local modifications exist"    
+    #depth: 1
+    #force: true # Ignore "Local modifications exist"    
   become: yes
   become_user: galaxy
 
 
-# Copy config files for galaxy
-
-- name: Copy galaxy config and modifications
-  notify: "restart galaxy"
-  synchronize:
-    src: app/
-    dest: /app/.
-    archive: no
-    recursive: yes
-## disabled become: below to avoid error 
-## "sudo: no tty present and no askpass program specified"
-##  .. we'll chown afterwards anyway
-#  become: yes
-
-- name: Ensure galaxy still owns home directory
-  file: 
-    path: /app # ~galaxy
-    group: galaxy
-    owner: galaxy
-    mode: u+rwX,g+rwX,o+rX
-    state: directory
-    recurse: yes
-  become: yes
-
-
-#Install yarn repo
-
-#Clonegalaxyrepo
-- name: clone galaxy repo
-  git:
-    repo: 'https://github.com/common-workflow-language/galaxy.git'
-    dest: /app/galaxy
-    force: true
-  become: yes
-  become_user: galaxy
 
 
 # Pre-install galaxy dependencies using virtualenv
@@ -144,9 +71,11 @@
 # TODO: There is a risk that this may update a galaxy
 # that is already running, but this problem
 # also exist with the git clone update above
+
 - name: Install Galaxy dependencies
   notify: "restart galaxy"
-  pip: 
+  pip:
+    virtualenv_command: virtualenv-3.6
     requirements: /app/galaxy/requirements.txt
     virtualenv: /app/galaxy/.venv
     # update from /app/galaxy/scripts/common_startup.sh 
