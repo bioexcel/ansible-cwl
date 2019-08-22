@@ -5,16 +5,13 @@ After=network-online.target
 Wants=network-online.target docker
 
 [Service]
-Type=idle
-#EnvironmentFile=/etc/sysconfig/galaxy
+Type=forking
 User=galaxy
-Group=galaxy
 ExecStart=/app/galaxy/run.sh start
 ExecReload=/app/galaxy/run.sh restart
 ExecStop=/app/galaxy/run.sh stop
-KillMode=process
-Restart=on-failure
-RestartSec=42s
+PIDFile=/app/galaxy/galaxy.pid
+TimeoutSec=900
 
 [Install]
 WantedBy=multi-user.target

@@ -33,6 +33,12 @@ ansible-playbook reana.yml
 ansible-playbook airflow.yml
 ```
 
+### Galaxy
+```
+ansible-playbook -i inventory galaxy.yml -k -K --extra-vars 'my_pass=<your_hashed_root_password>'
+```
+
+
 
 ## Running an implementation
 

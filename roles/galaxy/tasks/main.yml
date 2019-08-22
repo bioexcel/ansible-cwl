@@ -32,9 +32,8 @@
   user:
     name: galaxy
     comment: Galaxy server
-    #group: galaxy
     home: /app
-    password: $6$0IrkgawtZq3P2WB5$XGAVMT9x8OK.giWYSUDT/W9UDIkr.m9c89SnrcGhDQpno/49bQ17ZsDeQvWusKr4aqKPTBELRvKnCk8TDLazP.
+    password: "{{ my_pass }}"
   become: yes
 
 
@@ -44,19 +43,14 @@
   git:
     repo: 'https://github.com/common-workflow-language/galaxy.git'
     dest: /app/galaxy
-    #depth: 1
-    #force: true # Ignore "Local modifications exist"
   become: yes
   become_user: galaxy
-
 
 # Clone workflow-is-cwl repo:
 - name: Clone workflow-is-cwl repo.
   git:
     repo: 'https://github.com/EBI-metagenomics/workflow-is-cwl'
     dest: /app/workflow-is-cwl
-    #depth: 1
-    #force: true # Ignore "Local modifications exist"    
   become: yes
   become_user: galaxy
 
@@ -78,7 +72,7 @@
     virtualenv_command: virtualenv-3.6
     requirements: /app/galaxy/requirements.txt
     virtualenv: /app/galaxy/.venv
-    # update from /app/galaxy/scripts/common_startup.sh 
+    # update from /app/galaxy/scripts/common_startup.sh b
     # for GALAXY_WHEELS_INDEX_URL and PYPI_INDEX_URL
     extra_args:  --index-url "https://wheels.galaxyproject.org/simple" --extra-index-url "https://pypi.python.org/simple"
   become: yes
