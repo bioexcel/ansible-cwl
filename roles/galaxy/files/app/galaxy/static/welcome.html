@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="style/base.css" type="text/css" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <body style="margin: 0">
+    <div class="jumbotron">
+      <div class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+        <div class="col p-4 d-flex flex-column position-static bg-info text-light">
+          <h3 class="mb-0">This is the test server for the <i>ELIXIR Workflow Interoperability Implementation Study.</i></h3>
+          <p class="card-text mb-auto">
+            <div>You can test here the different CWL tools and workflows developed in the context of the 
+              <a target="_blank" href="https://elixir-europe.org/about-us/implementation-studies/cwl-2018">
+                Enabling the reuse, extension, scaling, and reproducibility of scientific workflows (2018-cwl) implementation study
+              </a>.
+            </div> 
+            <div>The source of the CWL tools and workflows is available on the 
+              <a target="_blank" href="https://github.com/EBI-Metagenomics/workflow-is-cwl/">ELIXIR Workflow Implementation Study CWL descriptions github repository</a>.
+            </div>
+          </p>
+        </div>
+        <div class="col-auto p-4 d-none d-lg-block bg-dark">
+          <img width="250" height="250" src="https://www.elixir-europe.org/system/files/white-orange-logo.png" />
+        </div>
+      </div>
+      <div class="alert alert-info" role="alert">
+        The preconfigured admin user for this server is <tt>galaxy@commonwl.org</tt>, its password is <tt>galaxy</tt>
+      </div>
+      <div class="alert alert-danger" role="alert">
+        This server is for demonstration purposes only, <b>DO NOT USE IT IN PRODUCTION</b>, it is not safe and stable enough!
+      </div>
+      <div class="row">
+        <div class="col-md-4">
+          <div class="card mb-4 h-100 shadow-sm">
+            <img class="h-50" src="https://view.commonwl.org/graph/png/github.com/EBI-Metagenomics/workflow-is-cwl/blob/master/workflows/TranscriptomeAssembly-wf.paired-end.cwl" width="100%">
+            <div class="card-body d-flex flex-column">
+              <p class="card-text">Marine eukaryotic metatranscriptome assembly workflow (paired-end version)
+              </p>
+              <div class="d-flex justify-content-between align-items-center mt-auto">
+                <div class="btn-group">
+                  <a target="_blank" href="https://view.commonwl.org/workflows/github.com/EBI-Metagenomics/workflow-is-cwl/blob/master/workflows/TranscriptomeAssembly-wf.paired-end.cwl"><button type="button" class="btn btn-sm btn-outline-secondary">View</button></a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card mb-4 h-100 shadow-sm">
+            <img class="h-50" src="https://view.commonwl.org/graph/png/github.com/EBI-Metagenomics/workflow-is-cwl/blob/master/workflows/TranscriptomeAssembly-wf.single-end.cwl" width="100%">
+            <div class="card-body d-flex flex-column">
+              <p class="card-text">Marine eukaryotic metatranscriptome assembly workflow (single-end version)</p>
+              <div class="d-flex justify-content-between align-items-center mt-auto">
+                <div class="btn-group">
+                  <a target="_blank" href="https://view.commonwl.org/workflows/github.com/EBI-Metagenomics/workflow-is-cwl/blob/master/workflows/TranscriptomeAssembly-wf.single-end.cwl"><button type="button" class="btn btn-sm btn-outline-secondary">View</button></a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card mb-4 h-100 shadow-sm">
+            <img class="h-50" src="https://view.commonwl.org/graph/png/github.com/EBI-Metagenomics/workflow-is-cwl/blob/master/workflows/TranscriptsAnnotation-i5only-wf.cwl" width="100%">
+            <div class="card-body d-flex flex-column">
+              <p class="card-text">Annotation workflow</p>
+              <div class="d-flex justify-content-between align-items-center mt-auto">
+                <div class="btn-group">
+                  <a target="_blank" href="https://view.commonwl.org/workflows/github.com/EBI-Metagenomics/workflow-is-cwl/blob/master/workflows/TranscriptsAnnotation-i5only-wf.cwl"><button type="button" class="btn btn-sm btn-outline-secondary">View</button></a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+      <div class="container">
+        <p class="lead">
+          <a target="_blank" class="reference" href="http://galaxyproject.org/">
+          Galaxy</a> is an open platform for supporting data intensive
+          research. Galaxy is developed by <a target="_blank" class="reference" href="https://galaxyproject.org/galaxy-team/">The Galaxy Team</a>
+          with the support of  <a target="_blank" class="reference" href="https://github.com/galaxyproject/galaxy/blob/dev/CONTRIBUTORS.md">many contributors</a>.
+        </p>
+        <footer>
+          The <a target="_blank" class="reference" href="http://galaxyproject.org/">Galaxy Project</a>
+          is supported in part by <a target="_blank" class="reference" href="http://www.genome.gov">NHGRI</a>,
+          <a target="_blank" class="reference" href="http://www.nsf.gov">NSF</a>,
+          <a target="_blank" class="reference" href="http://www.huck.psu.edu">The Huck Institutes of the Life Sciences</a>,
+          <a target="_blank" class="reference" href="http://www.ics.psu.edu">The Institute for CyberScience at Penn State</a>,
+          and <a target="_blank" class="reference" href="http://www.jhu.edu/">Johns Hopkins University</a>.
+        </footer>
+      </div>
+    </div>
+  </body>
+</html>

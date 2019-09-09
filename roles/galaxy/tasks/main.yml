@@ -54,35 +54,15 @@
   become: yes
   become_user: galaxy
 
-# Clone galaxy-is-cwl-docker:
-- name: Clone galaxy-is-cwl-docker
-  git:
-    repo: 'https://gitlab.pasteur.fr/hmenager/galaxy-cwl-is-docker/'
-    dest: /app/galaxy-cwl-is-docker
+- name: Create cwl tools directory
+  file:
+    path: /app/galaxy/lib/galaxy/tools/cwl/
+    state: directory
+    owner: galaxy
+    group: galaxy
   become: yes
   become_user: galaxy
-
-- name: Your copy task
-  copy: src={{ item.src }} dest={{ item.dest }}
-  with_items:
-    - { src: ' representation.py', dest: '/app/galaxy/lib/galaxy/tools/cwl/representation.py' }
-    - { src: ' parser.py', dest: '/app/galaxy/lib/galaxy/tools/cwl/parser.py' }
-    - { src: ' process.py', dest: '/app/galaxy/.venv/local/lib/python2.7/site-packages/cwltool/process.py ' }
-    - { src: ' wrappers.py', dest: '/app/galaxy/lib/galaxy/tools/wrappers.py' }
-    - { src: ' job_conf.xml', dest: '/app/galaxy/config/job_conf.xml' }
-    - { src: ' dependency_resolvers_conf.xml', dest: '/app/galaxy/config/dependency_resolvers_conf.xml' }
-    - { src: ' galaxy.yml', dest: '/app/galaxy/config/galaxy.yml' }
-    - { src: ' tool_conf.xml', dest: '/app/galaxy/config/tool_conf.xml' }
-    - { src: ' welcome.html', dest: '/app/galaxy/static/welcome.html' }
-    - { src: ' start.sh', dest: '/app/start.sh' }
-    - { src: ' Diamon.makedb-v0.9.21.cwl', dest: '/app/workflow-is-cwl/tools/Diamond/Diamon.makedb-v0.9.21.cwl' }
-    - { src: ' create_user.py', dest: '/app/galaxy/create_user.py' }
-    - { src: ' workflows.py', dest: '/app/galaxy/lib/galaxy/managers/workflows.py' }
-    - { src: ' upload_material.py', dest: '/app' }
-    - { src: ' start_galaxy_and_upload_material.sh', dest: '/app' }
-  become: yes
-  become_user: galaxy
-
+  
 
 
 # Pre-install galaxy dependencies using virtualenv
@@ -103,6 +83,28 @@
     # update from /app/galaxy/scripts/common_startup.sh b
     # for GALAXY_WHEELS_INDEX_URL and PYPI_INDEX_URL
     extra_args:  --index-url "https://wheels.galaxyproject.org/simple" --extra-index-url "https://pypi.python.org/simple"
+  become: yes
+  become_user: galaxy
+
+
+- name: Your copy task
+  copy: src={{ item }} dest=/{{ item }}
+  with_items:
+   - 'app/galaxy/lib/galaxy/tools/cwl/representation.py' # Good
+   - 'app/galaxy/lib/galaxy/tools/cwl/parser.py' # Good
+   - 'app/galaxy/config/job_conf.xml' # Good
+   - 'app/galaxy/config/dependency_resolvers_conf.xml' # Goof
+   - 'app/galaxy/config/galaxy.yml' # Good
+   - 'app/galaxy/config/tool_conf.xml' # Good
+   - 'app/galaxy/static/welcome.html' # Good
+   - 'app/start.sh' # Good
+   - 'app/workflow-is-cwl/tools/Diamond/Diamon.makedb-v0.9.21.cwl' # Good
+   - 'app/upload_material.py' # Good
+   - 'app/start_galaxy_and_upload_material.sh' # Good
+   - 'app/galaxy/create_user.py'
+#   - 'app/galaxy/lib/galaxy/managers/workflows.py'  # Minor changes in different orders to main
+#   - 'app/galaxy/.venv/lib/python3.6/site-packages/cwltool/process.py' # Causes Error #Seems to contain print statements only.
+#   - 'app/galaxy/lib/galaxy/tools/wrappers.py' # Causes Erro
   become: yes
   become_user: galaxy
 
