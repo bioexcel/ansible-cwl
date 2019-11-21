@@ -6,8 +6,6 @@
     name: galaxy
     state: restarted
   become: yes
-  become_user: root
-  become_method: su
   
 - name: restart docker
   listen: "restart docker"    
@@ -15,5 +13,3 @@
     name: docker
     state: restarted
   become: yes
-  become_user: root
-  become_method: su
