@@ -79,7 +79,6 @@
   become_method: sudo   
 
 
-# Clone galaxy repo:
 - name: Clone galaxy repo
   notify: "restart galaxy"
   git:
@@ -92,8 +91,7 @@
   become_method: sudo
 
 
-# Clone galaxy repo:
-- name: Clone galaxy repo.
+- name: Clone workflow-is-cwl repo.
   git:
     repo: 'https://github.com/EBI-metagenomics/workflow-is-cwl'
     dest: /app/workflow-is-cwl
@@ -102,9 +100,6 @@
   become: yes
   become_user: galaxy
   become_method: sudo
-
-
-# Copy config files for galaxy
 
 - name: Copy galaxy config and modifications
   notify: "restart galaxy"
@@ -191,7 +186,10 @@
 # equivalent so that :8080 is open
 # see https://docs.ansible.com/ansible/latest/modules/firewalld_module.html#firewalld-module
 
-         
+- firewalld:
+    port: 8080 # http-alt / Galaxy
+    permanent: yes
+    state: enabled
 
 ## TODO: Follow more of guidelines from 
 # https://docs.galaxyproject.org/en/latest/admin/production.html 
