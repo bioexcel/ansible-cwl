@@ -111,7 +111,6 @@
    - 'app/galaxy/config/tool_conf.xml' # Good
    - 'app/galaxy/static/welcome.html' # Good
    - 'app/start.sh' # Good
-   - 'app/workflow-is-cwl/tools/Diamond/Diamon.makedb-v0.9.21.cwl' # Good
    - 'app/upload_material.py' # Good
    - 'app/start_galaxy_and_upload_material.sh' # Good
    - 'app/galaxy/create_user.py'
