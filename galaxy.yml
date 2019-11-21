@@ -1,4 +1,6 @@
 ---
-- hosts: 10.12.156.3 #10.186.125.105
+- hosts: all
   roles:
     - galaxy
+  vars:
+    - ansible_become_method: su

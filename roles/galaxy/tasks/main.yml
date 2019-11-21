@@ -10,8 +10,6 @@
     gpgcheck: yes
     gpgkey: https://dl.yarnpkg.com/rpm/pubkey.gpg    
   become: yes
-  become_user: root
-  become_method: sudo
 
 
 # Install EPEL repo, needed for pip and other packages.
@@ -21,17 +19,11 @@
     name: ['epel-release']
     state: present
   become: yes
-  become_user: root
-  become_method: sudo
 
 
-# Install dependencies
-# On CentOS libpq = postgresql
-# https://serverfault.com/questions/316703/how-to-install-libpq-dev-on-centos-5-5
-
-- name: Install dependencies
+- name: Install python dependencies
   yum:
-    name: [python-devel, python-pip, python-virtualenv, gcc, make, postgresql-devel, yarn, bzip2, git, docker]
+    name: [python36-pip, python36-devel, python36, gcc, make, python36-virtualenv, postgresql-devel, yarn, bzip2, git, docker]
   notify: "restart galaxy" # in case something upgrades
   become: yes
   become_user: root
@@ -41,42 +33,15 @@
   group:
     name: galaxy
   become: yes
-  become_user: root
-  become_method: sudo   
 
-# This is just a trick so that the synchronize: stage
-# later can install files without needing become: yes
-- name: Ensure user "{{ ansible_user_id }}" is member of "galaxy" group
-  user:
-    append: yes
-    groups: galaxy
-    name: '{{ ansible_user_id }}'
-  become: yes
-  become_user: root
-  become_method: sudo   
 
 - name: Ensure user "galaxy" exist
   user:
     name: galaxy
     comment: Galaxy server
-    group: galaxy
     home: /app
+    password: "{{ my_pass }}"
   become: yes
-  become_user: root
-  become_method: sudo   
-
-
-- name: Ensure galaxy owns home directory
-  file: 
-    path: /app # ~galaxy
-    group: galaxy
-    owner: galaxy
-    mode: u+rwX,g+rwX,o+rX
-    state: directory
-    recurse: yes
-  become: yes
-  become_user: root
-  become_method: sudo   
 
 
 - name: Clone galaxy repo
@@ -84,19 +49,14 @@
   git:
     repo: 'https://github.com/common-workflow-language/galaxy.git'
     dest: /app/galaxy
-    depth: 1
-    force: true # Ignore "Local modifications exist"
   become: yes
   become_user: galaxy
-  become_method: sudo
 
-
+# Clone workflow-is-cwl repo:
 - name: Clone workflow-is-cwl repo.
   git:
     repo: 'https://github.com/EBI-metagenomics/workflow-is-cwl'
     dest: /app/workflow-is-cwl
-    depth: 1
-    force: true # Ignore "Local modifications exist"    
   become: yes
   become_user: galaxy
   become_method: sudo
@@ -121,12 +81,16 @@
     group: galaxy
     owner: galaxy
     mode: u+rwX,g+rwX,o+rX
-    state: directory
-    recurse: yes
-  become: yes
-  become_user: root
-  become_method: sudo
 
+- name: Create cwl tools directory
+  file:
+    path: /app/galaxy/lib/galaxy/tools/cwl/
+    state: directory
+    owner: galaxy
+    group: galaxy
+  become: yes
+  become_user: galaxy
+  
 
 
 # Pre-install galaxy dependencies using virtualenv
@@ -137,17 +101,41 @@
 # TODO: There is a risk that this may update a galaxy
 # that is already running, but this problem
 # also exist with the git clone update above
+
 - name: Install Galaxy dependencies
   notify: "restart galaxy"
-  pip: 
+  pip:
+    virtualenv_command: virtualenv-3.6
     requirements: /app/galaxy/requirements.txt
     virtualenv: /app/galaxy/.venv
-    # update from /app/galaxy/scripts/common_startup.sh 
+    # update from /app/galaxy/scripts/common_startup.sh b
     # for GALAXY_WHEELS_INDEX_URL and PYPI_INDEX_URL
     extra_args:  --index-url "https://wheels.galaxyproject.org/simple" --extra-index-url "https://pypi.python.org/simple"
   become: yes
   become_user: galaxy
-  become_method: sudo  
+
+
+- name: Your copy task
+  copy: src={{ item }} dest=/{{ item }}
+  with_items:
+   - 'app/galaxy/lib/galaxy/tools/cwl/representation.py' # Good
+   - 'app/galaxy/lib/galaxy/tools/cwl/parser.py' # Good
+   - 'app/galaxy/config/job_conf.xml' # Good
+   - 'app/galaxy/config/dependency_resolvers_conf.xml' # Goof
+   - 'app/galaxy/config/galaxy.yml' # Good
+   - 'app/galaxy/config/tool_conf.xml' # Good
+   - 'app/galaxy/static/welcome.html' # Good
+   - 'app/start.sh' # Good
+   - 'app/workflow-is-cwl/tools/Diamond/Diamon.makedb-v0.9.21.cwl' # Good
+   - 'app/upload_material.py' # Good
+   - 'app/start_galaxy_and_upload_material.sh' # Good
+   - 'app/galaxy/create_user.py'
+#   - 'app/galaxy/lib/galaxy/managers/workflows.py'  # Minor changes in different orders to main
+#   - 'app/galaxy/.venv/lib/python3.6/site-packages/cwltool/process.py' # Causes Error #Seems to contain print statements only.
+#   - 'app/galaxy/lib/galaxy/tools/wrappers.py' # Causes Erro
+  become: yes
+  become_user: galaxy
+
 
 # Make and start a systemd service
 - name: Add galaxy service
@@ -159,16 +147,14 @@
     group: root
     mode: 0644
   become: yes
-  become_user: root
-  become_method: sudo
+
 
 - name: Make sure docker is running
   systemd:
     state: started
     name: docker  
   become: yes
-  become_user: root
-  become_method: sudo    
+
 
 - name: Make sure galaxy is running
   systemd:
@@ -177,8 +163,6 @@
     name: galaxy  
     daemon_reload: true # we might just have installed the service above
   become: yes
-  become_user: root
-  become_method: sudo    
 
 
 # TODO: install and enable galaxy.service for firewalld  
