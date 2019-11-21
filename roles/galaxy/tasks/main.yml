@@ -26,8 +26,6 @@
     name: [python36-pip, python36-devel, python36, gcc, make, python36-virtualenv, postgresql-devel, yarn, bzip2, git, docker]
   notify: "restart galaxy" # in case something upgrades
   become: yes
-  become_user: root
-  become_method: sudo
 
 - name: Ensure group "galaxy" exists
   group:
@@ -59,21 +57,6 @@
     dest: /app/workflow-is-cwl
   become: yes
   become_user: galaxy
-  become_method: sudo
-
-- name: Copy galaxy config and modifications
-  notify: "restart galaxy"
-  synchronize:
-    src: app/
-    dest: /app/.
-    archive: no
-    recursive: yes
-## disabled become: below to avoid error 
-## "sudo: no tty present and no askpass program specified"
-##  .. we'll chown afterwards anyway
-#  become: yes
-#  become_user: root 
-#  become_method: su
 
 - name: Ensure galaxy still owns home directory
   file: 
@@ -115,7 +98,7 @@
   become_user: galaxy
 
 
-- name: Your copy task
+- name: Copy Galaxy files
   copy: src={{ item }} dest=/{{ item }}
   with_items:
    - 'app/galaxy/lib/galaxy/tools/cwl/representation.py' # Good
