@@ -154,7 +154,7 @@
 # see https://docs.ansible.com/ansible/latest/modules/firewalld_module.html#firewalld-module
 
 - firewalld:
-    port: 8080/http-alt # Galaxy
+    port: 8080/tcp # Galaxy
     permanent: yes
     state: enabled
 
