@@ -11,7 +11,7 @@ ExecStart=/app/galaxy/run.sh start
 ExecReload=/app/galaxy/run.sh restart
 ExecStop=/app/galaxy/run.sh stop
 PIDFile=/app/galaxy/galaxy.pid
-TimeoutSec=900
+TimeoutSec=5min
 
 [Install]
 WantedBy=multi-user.target
