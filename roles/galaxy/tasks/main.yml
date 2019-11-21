@@ -20,6 +20,11 @@
     state: present
   become: yes
 
+- name: Upgrade all packages
+  yum:
+    name: '*'
+    state: latest
+  become: yes
 
 - name: Install python dependencies
   yum:
@@ -38,9 +43,7 @@
     name: galaxy
     comment: Galaxy server
     home: /app
-    password: "{{ my_pass }}"
   become: yes
-
 
 - name: Clone galaxy repo
   notify: "restart galaxy"
@@ -49,6 +52,7 @@
     dest: /app/galaxy
   become: yes
   become_user: galaxy
+  become_method: sudo # as with su galaxy must have same as root password!
 
 # Clone workflow-is-cwl repo:
 - name: Clone workflow-is-cwl repo.
@@ -57,6 +61,7 @@
     dest: /app/workflow-is-cwl
   become: yes
   become_user: galaxy
+  become_method: sudo # as with su galaxy must have same as root password!
 
 - name: Ensure galaxy still owns home directory
   file: 
@@ -71,10 +76,7 @@
     state: directory
     owner: galaxy
     group: galaxy
-  become: yes
-  become_user: galaxy
-  
-
+  become: yes  
 
 # Pre-install galaxy dependencies using virtualenv
 # NOTE: Galaxy will also do this from run.sh
@@ -96,7 +98,7 @@
     extra_args:  --index-url "https://wheels.galaxyproject.org/simple" --extra-index-url "https://pypi.python.org/simple"
   become: yes
   become_user: galaxy
-
+  become_method: sudo # as with su galaxy must have same as root password!
 
 - name: Copy Galaxy files
   copy: src={{ item }} dest=/{{ item }}
@@ -117,8 +119,6 @@
 #   - 'app/galaxy/.venv/lib/python3.6/site-packages/cwltool/process.py' # Causes Error #Seems to contain print statements only.
 #   - 'app/galaxy/lib/galaxy/tools/wrappers.py' # Causes Erro
   become: yes
-  become_user: galaxy
-
 
 # Make and start a systemd service
 - name: Add galaxy service

@@ -2,5 +2,5 @@
 - hosts: all
   roles:
     - galaxy
-  vars:
-    - ansible_become_method: su
+      #  vars:
+          #    - ansible_become_method: su
