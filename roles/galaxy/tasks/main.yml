@@ -25,6 +25,7 @@
     name: '*'
     state: latest
   become: yes
+  notify: ["restart galaxy", "restart docker"]
 
 - name: Install python dependencies
   yum:
@@ -36,7 +37,6 @@
   group:
     name: galaxy
   become: yes
-
 
 - name: Ensure user "galaxy" exist
   user:
@@ -50,6 +50,7 @@
   git:
     repo: 'https://github.com/common-workflow-language/galaxy.git'
     dest: /app/galaxy
+    force: yes
   become: yes
   become_user: galaxy
   become_method: sudo # as with su galaxy must have same as root password!
@@ -118,6 +119,7 @@
 #   - 'app/galaxy/.venv/lib/python3.6/site-packages/cwltool/process.py' # Causes Error #Seems to contain print statements only.
 #   - 'app/galaxy/lib/galaxy/tools/wrappers.py' # Causes Erro
   become: yes
+  notify: "restart galaxy"
 
 # Make and start a systemd service
 - name: Add galaxy service
