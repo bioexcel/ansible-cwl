@@ -17,7 +17,7 @@
 
 - name: Install dependencies for cwl
   yum:
-    name: ['python2-pip', 'python2-devel', 'python-virtualenv']
+    name: ['python2-pip', 'python2-devel', 'python2-virtualenv', 'gcc-c++']
     state: present
   become: yes
   become_user: root
@@ -31,6 +31,7 @@
     name: toil[cwl]
     virtualenv: ~/toil_test
     virtualenv_python: python2.7
+    virtualenv_command: virtualenv-2 #RHEL8
 
 
 # Create files to run hello world.
