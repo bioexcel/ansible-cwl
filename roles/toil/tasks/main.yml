@@ -1,23 +1,11 @@
 ---
 # Tasks to install and configure toil
 
-
-# Install EPEL repo, needed for pip and other packages.
-
-- name: Install EPEL
-  yum:
-    name: ['epel-release']
-    state: present
-  become: yes
-  become_user: root
-  become_method: su
-
-
 # Install dependencies for CWL-runner
 
 - name: Install dependencies for cwl
   yum:
-    name: ['python2-pip', 'python2-devel', 'python2-virtualenv', 'gcc-c++']
+    name: ['python3-pip', 'python3-devel', 'gcc-c++']
     state: present
   become: yes
   become_user: root
@@ -30,8 +18,7 @@
   pip:
     name: toil[cwl]
     virtualenv: ~/toil_test
-    virtualenv_python: python2.7
-    virtualenv_command: virtualenv-2 #RHEL8
+    virtualenv_command: pyvenv-3 #RHEL8 py3
 
 
 # Create files to run hello world.

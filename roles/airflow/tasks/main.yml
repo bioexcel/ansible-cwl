@@ -17,7 +17,7 @@
 
 - name: Install dependencies for airflow
   yum:
-    name: ['python2-pip', 'python2-devel', 'python-virtualenv', 'mariadb']
+    name: ['python3-pip', 'python3-devel', 'python3-virtualenv', 'mariadb']
     # libmysqlclient-dev in ubuntu
     state: present
   become: yes
@@ -35,8 +35,8 @@
     name: python-ldap
     name: setuptools
     virtualenv: ~/airflow_test
-    virtualenv_python: python2.7
-
+    #virtualenv_python: python2.7
+    virtualenv_command: pyvenv-3 #RHEL8 py3
 
 # Install airflow in virtual env
 
@@ -44,7 +44,8 @@
   pip:
     name: cwl-airflow
     virtualenv: ~/airflow_test
-    virtualenv_python: python2.7
+    virtualenv_command: pyvenv-3 #RHEL8 py3
+    #virtualenv_python: python2.7
     extra_args: "--find-links https://michael-kotliar.github.io/cwl-airflow-wheels"
 
 
