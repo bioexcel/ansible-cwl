@@ -18,7 +18,7 @@
 
 - name: Install reana dependencies
   yum:
-    name: ['python36-pip', 'python36-devel', 'python36', 'gcc', 'make', 'python-virtualenv']
+    name: ['python3-pip', 'python3-devel', 'python3', 'gcc', 'make', 'python3-virtualenv']
     state: present
   become: yes
   become_user: root
@@ -31,7 +31,8 @@
   pip:
     name: ['reana-client', 'reana-cluster']
     virtualenv: ~/reana_test
-    virtualenv_python: python3.6
+#    virtualenv_python: python3
+    virtualenv_command: pyvenv-3 #RHEL8 py3
 
 
 # Create files to run hello world.
