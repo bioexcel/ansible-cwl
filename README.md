@@ -33,6 +33,12 @@ ansible-playbook reana.yml
 ansible-playbook airflow.yml
 ```
 
+### Cromwell
+
+```
+ansible-playbook cromwell.yml
+```
+
 ### Galaxy
 ```
 ansible-playbook -i inventory galaxy.yml -k -K --extra-vars 'my_pass=<your_hashed_root_password>'
@@ -90,8 +96,17 @@ reana-client download
 ```
 cd ~/airflow_test
 source bin/activate
-cwl-tool example.cwl example-job.yaml
+cwltool example.cwl example-job.yaml
 ```
+
+### Cromwell
+
+```
+cd ~/cromwell_test
+conda activate cromwell_test
+cromwell run example.cwl -i example-job.yaml
+```
+
 ... #cwl-airflow init
 ... #(airflow scheduler &> /dev/null &) && (airflow webserver&> /dev/null &) && cwl-airflow submit example.cwl example-job.yaml
 
