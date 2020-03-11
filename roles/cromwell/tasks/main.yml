@@ -1,0 +1,116 @@
+---
+
+- name: Check - Path
+  shell: grep '/opt/miniconda3/bin' /etc/profile
+  register: conda_path_exists
+
+
+- name: Install Conda
+  block:
+    - name: Download Miniconda
+      get_url:
+        url: https://repo.continuum.io/miniconda/Miniconda3-4.5.4-Linux-x86_64.sh
+        dest: /tmp/install-miniconda.sh
+        checksum: md5:a946ea1d0c4a642ddf0c3a26a18bb16d
+        mode: 0550
+
+    - name: Create conda folder
+      become: True
+      become_user: root 
+      become_method: su
+      file:
+        path: /opt/miniconda3
+        state: directory
+        owner: longr
+        mode: 0755
+        recurse: yes
+
+    - name: Run the installer
+      shell: /tmp/install-miniconda.sh -b -u -p /opt/miniconda3
+
+    - name: Remove the installer
+      file:
+        state: absent
+        path: /tmp/install-miniconda.sh
+
+    - name: Add miniconda bin to path
+      become: True
+      become_user: root 
+      become_method: su
+      shell: echo 'export PATH=/opt/miniconda3/bin:$PATH' >> /etc/profile
+
+    - name: conda - read permission for all
+      become: True
+      become_user: root 
+      become_method: su
+      file:
+        path: /opt/miniconda3
+        mode: 0775
+        recurse: yes
+
+    - name: conda - execution permission for all
+      become: True
+      become_user: root 
+      become_method: su
+      file:
+        path: /opt/miniconda3/bin
+        mode: 0775
+        recurse: yes
+
+    - name: enable conda enviroment
+      become: True
+      become_user: root 
+      become_method: su
+      file:
+        src: '/opt/miniconda3/etc/profile.d/conda.sh'
+        dest: '/etc/profile.d/conda.sh'
+        owner: root
+        group: root
+        mode: u=rw,g=r,o=r
+        state: link
+  when: conda_path_exists == ""      
+
+- name: check for enviorment
+  shell: /opt/miniconda3/bin/conda env list | grep 'cromwell_test'
+  register: conda_env_exists
+
+- name: install conda-forge channel
+  shell: /opt/miniconda3/bin/conda config --add channels conda-forge
+  when: conda_env_exists.stdout == ""
+
+- name: install cromwell
+  shell: /opt/miniconda3/bin/conda create -y -f -n cromwell_test cromwell
+  when: conda_env_exists.stdout == ""
+
+
+- name: install cwl in virtualenv
+  file:
+    path: ~/cromwell_test
+    state: directory
+    mode: '0755'
+
+
+# Create files to run hello world.
+
+- name: example-job.yaml
+  copy:
+    dest: ~/cromwell_test/example-job.yaml
+    content: |
+      message: Hello world!
+
+- name: example.cwl
+  copy:
+    dest: ~/cromwell_test/example.cwl
+    content: |
+      cwlVersion: v1.0
+      class: CommandLineTool
+      baseCommand: echo
+      stdout: output.txt
+      inputs:
+        message:
+          type: string
+          inputBinding:
+            position: 1
+      outputs:
+        output:
+          type: stdout
