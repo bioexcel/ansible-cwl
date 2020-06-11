@@ -1,140 +1,110 @@
 ---
-# Tasks to install and configure kubernetes and minikube
-## https://www.server-world.info/en/note?os=CentOS_7&p=kubernetes&f=1
+    - name: Install IUS repo
+      yum:
+        name: https://centos7.iuscommunity.org/ius-release.rpm
+        state: present
 
+    - name: Install gcc
+      yum:
+        name: gcc-c++
+        state: present
 
-# Install EPEL repo, needed for pip and other packages.
+    - name: Install python2.7
+      yum:
+        name: python
+        state: present
 
-- name: Install EPEL
-  yum:
-    name: ['epel-release']
-    state: present
-  become: yes
-  become_user: root
-  become_method: su
+    - name: Install virtualenv
+      yum:
+        name: python-virtualenv
+        state: present
 
-- name: Install reana dependencies
-  yum:
-    name: ['qemu-kvm', 'libvirt', 'libvirt-daemon-kvm']
-    state: present
-  become: yes
-  become_user: root
-  become_method: su
+    - name: Upgrade virtualenv pip
+      pip:
+        virtualenv: "/usr/local/reana"
+        name: pip
+        extra_args: --upgrade
 
+    - name: Upgrade virtualenv setuptools
+      pip:
+        virtualenv: "/usr/local/reana"
+        name: setuptools
+        extra_args: --upgrade
 
-# Add user to libvirtd group
+    - name: Install yum-utils
+      yum:
+        name: yum-utils
+        state: latest
 
-- name: add user to libvirtd group
-  user:
-    user: longr
-    groups: libvirt
-    append: yes
-  become: yes
-  become_user: root
-  become_method: su
-  
+    - name: Install device-mapper-persistent-data
+      yum:
+        name: device-mapper-persistent-data
+        state: latest
 
-# Install kubernetes repository
+    - name: Install lvm2
+      yum:
+        name: lvm2
+        state: latest
 
-- name: kubernetes.repo
-  copy:
-    dest: /etc/yum.repos.d/kubernetes.repo
-    content: |
-      [kubernetes]
-      name=Kubernetes
-      baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-$basearch
-      enabled=1
-      gpgcheck=1
-      repo_gpgcheck=0
-      gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
-  become: yes
-  become_user: root
-  become_method: su
-
-
-# Get Docker Driver for kubernetes
+    - name: Add docker yum repository
+      yum_repository:
+        name: docker-ce
+        description: Docker CE repo - $basearch
+        file: docker-ce
+        baseurl: https://download.docker.com/linux/centos/7/$basearch/stable
+        enabled: yes
+        sslverify: yes
+        gpgcheck: no
+      become: yes
     
-- name: Get and install docker driver
-  get_url:
-    url: "https://github.com/kubernetes/minikube/releases/download/v1.2.0/docker-machine-driver-kvm2"
-    dest: "/usr/local/bin/docker-machine-driver-kvm2"
-  become: yes
-  become_user: root
-  become_method: su
+    - name: Install Docker CE
+      yum:
+        name: docker-ce-18.06.1.ce
+        allow_downgrade: yes
 
+    - name: Install git
+      yum:
+        name: git
+        state: latest
 
-# Correct permissions for minikube driver
+    - name: Enable and start Docker
+      systemd:
+        name: docker
+        enabled: yes
+        state: started
 
-- name: Change permissions for minikube driver
-  file:
-    dest: "/usr/local/bin/docker-machine-driver-kvm2"
-    mode: 0755
-  become: yes
-  become_user: root
-  become_method: su
+    - name: Install kubectl
+      shell: |
+        curl -Lo /usr/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+        # curl -Lo /usr/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.14.1/bin/linux/amd64/kubectl
+        chmod +x /usr/bin/kubectl
 
+    - name: Install minikube
+      shell: |
+        curl -Lo /usr/bin/minikube https://storage.googleapis.com/minikube/releases/v1.0.0/minikube-linux-amd64
+        chmod +x /usr/bin/minikube
 
-# Install kubectl
+    - name: Deploy minikube
+      shell: |
+        mkdir /var/kubernetes
+        env MINIKUBE_HOME=/var/kubernetes/.minikube KUBECONFIG=/var/kubernetes/.kube/config minikube start --vm-driver none
+        chgrp -R kubernetes /var/kubernetes
+        find /var/kubernetes -type d -exec chmod g+rx {} \;
+        find /var/kubernetes -type f -exec chmod g+r {} \;
 
-- name: Install kubectl
-  yum:
-    name: kubectl
-    state: present
-  become: yes
-  become_user: root
-  become_method: su
+    - name: Setup minikube environment
+      shell: |
+        echo export MINIKUBE_HOME=/var/kubernetes/.minikube >> /etc/profile.d/kubernetes.sh
+        echo export KUBECONFIG=/var/kubernetes/.kube/config >> /etc/profile.d/kubernetes.sh
 
+    - name: Install reana-cluster
+      pip:
+        name: git+https://github.com/khurtado/reana-cluster@job_manager
+        virtualenv: "/usr/local/reana"
+        virtualenv_command: virtualenv-2.7
 
-# Get Minikube
-
-- name: Get and install minikube
-  get_url:
-    url: "https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64"
-    dest: "/usr/local/bin/minikube"
-  become: yes
-  become_user: root
-  become_method: su
-
-
-# Correct permissions for minikube
-
-- name: Change permissions for minikube driver
-  file:
-    dest: "/usr/local/bin/minikube"
-    mode: 0755
-  become: yes
-  become_user: root
-  become_method: su
-
-
-# Install helm
-
-- name: Install helm
-  unarchive:
-    src: "https://storage.googleapis.com/kubernetes-helm/helm-v2.12.2-linux-amd64.tar.gz"
-    dest: "/usr/local/bin/"
-    extra_opts: "linux-amd64/helm"
-    remote_src: yes
-  become: yes
-  become_user: root
-  become_method: su
-
-
-# Correct permissions for helm
-
-- name: Change permissions for helm driver
-  copy:
-    src: /usr/local/bin/linux-amd64/helm
-    dest: /usr/local/bin/helm
-    mode: '0755'
-    remote_src: yes
-  become: yes
-  become_user: root
-  become_method: su
-
-
-# Start minikube
-
-- name: start minikube cluster
-  command: minikube start --feature-gates="TTLAfterFinished=true" --vm-driver kvm2 --cpus 4 --memory 4096
-  #become: yes
+    - name: Install reana-client
+      pip:
+        name: git+https://github.com/khurtado/reana-client@job_manager
+        virtualenv: "/usr/local/reana"
+        virtualenv_command: virtualenv-2.7

@@ -2,3 +2,6 @@
 - hosts: all
   roles:
     - reana
+  become: yes
+  become_user: root
+  become_method: su
